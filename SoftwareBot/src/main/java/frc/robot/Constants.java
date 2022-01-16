@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -24,20 +26,20 @@ public final class Constants {
     public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 1;
     public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 5;
     public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 9;
-    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(244); // why negative?
+    public static final double FRONT_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(302.52);
 
     public static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR = 2;
     public static final int FRONT_RIGHT_MODULE_STEER_MOTOR = 6; 
     public static final int FRONT_RIGHT_MODULE_STEER_ENCODER = 10;
-    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(-312);
+    public static final double FRONT_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(23.38);
 
     public static final int BACK_LEFT_MODULE_DRIVE_MOTOR = 3; 
     public static final int BACK_LEFT_MODULE_STEER_MOTOR = 7; 
     public static final int BACK_LEFT_MODULE_STEER_ENCODER = 11;
-    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(83);
+    public static final double BACK_LEFT_MODULE_STEER_OFFSET = -Math.toRadians(96.33);
 
     public static final int BACK_RIGHT_MODULE_DRIVE_MOTOR = 4;
     public static final int BACK_RIGHT_MODULE_STEER_MOTOR = 8;
     public static final int BACK_RIGHT_MODULE_STEER_ENCODER = 12;
-    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(130);
+    public static final double BACK_RIGHT_MODULE_STEER_OFFSET = -Math.toRadians(310.96);
 }
