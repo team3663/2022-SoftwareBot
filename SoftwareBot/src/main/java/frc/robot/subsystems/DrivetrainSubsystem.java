@@ -17,9 +17,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -47,10 +49,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
           new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0)
   );
 
-  private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(kinematics, getGyroscopeRotation(), new Pose2d());
+  // private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(kinematics, getGyroscopeRotation(), new Pose2d());
 
+  /*
   private double timeStamp = 0;
   private Pose2d pose = new Pose2d();
+  */
 
   private final PigeonIMU pigeon = new PigeonIMU(DRIVETRAIN_PIGEON_ID);
         // counter-clockwise rotation increases angle
@@ -63,10 +67,16 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
-  public DrivetrainSubsystem() {
-    ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
+  NetworkTableEntry poseXEntry;
+  NetworkTableEntry poseYEntry;
+  NetworkTableEntry poseAngleEntry;
+  NetworkTableEntry driveSignalXEntry;
+  NetworkTableEntry driveSignalYEntry;
+  NetworkTableEntry driveSignalRotationEntry;
 
-    // FIXME GearRatio
+  public DrivetrainSubsystem() {
+    ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain_modules");
+
     frontLeftModule = Mk4SwerveModuleHelper.createFalcon500(
             tab.getLayout("Front Left Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
@@ -110,6 +120,28 @@ public class DrivetrainSubsystem extends SubsystemBase {
             BACK_RIGHT_MODULE_STEER_ENCODER,
             BACK_RIGHT_MODULE_STEER_OFFSET
     );
+
+ShuffleboardTab drivebaseTab = Shuffleboard.getTab("Drivetrain_Robot");
+        poseXEntry = drivebaseTab.add("Pose X", 0.0)
+                .withPosition(0, 0)
+                .withSize(1, 1)
+                .getEntry();
+        poseYEntry = drivebaseTab.add("Pose Y", 0.0)
+                .withPosition(0, 1)
+                .withSize(1, 1)
+                .getEntry();
+        poseAngleEntry = drivebaseTab.add("Pose Angle", 0.0)
+                .withPosition(0, 2)
+                .withSize(1, 1)
+                .getEntry();
+
+ShuffleboardLayout driveSignalContainer = drivebaseTab.getLayout("Drive Signal", BuiltInLayouts.kGrid)
+                .withPosition(0, 3)
+                .withSize(3, 1);
+        driveSignalYEntry = driveSignalContainer.add("Drive Signal Strafe", 0.0).getEntry();
+        driveSignalXEntry = driveSignalContainer.add("Drive Signal Forward", 0.0).getEntry();
+        driveSignalRotationEntry = driveSignalContainer.add("Drive Signal Rotation", 0.0).getEntry();
+
   }
 
   public void zeroGyroscope() {
@@ -118,7 +150,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public Rotation2d getGyroscopeRotation() {
-    return new Rotation2d(pigeon.getFusedHeading());
+    return Rotation2d.fromDegrees(pigeon.getFusedHeading());
     // FIXME compass turns 180 when robot rotates by 90 (may be fixed by gear ratio)
 
     // changed from fromDegrees to fromRadians while writing updateOdometry, not sure if this would cause problems 
@@ -135,6 +167,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     this.chassisSpeeds = chassisSpeeds;
   }
 
+
+  /*
   public void updateOdometry() {
           Translation2d lastTranslation = pose.getTranslation();
 
@@ -149,6 +183,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
           Rotation2d currentAngle = getGyroscopeRotation();
           pose = new Pose2d(lastTranslation.plus(translationChange), currentAngle);
   }
+  */
+  
 
 @Override
   public void periodic() {
@@ -160,6 +196,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
     backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());
 
-    updateOdometry();
+    driveSignalYEntry.setDouble(chassisSpeeds.vyMetersPerSecond);
+    driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond);
+    driveSignalRotationEntry.setDouble(chassisSpeeds.omegaRadiansPerSecond);
+
+    // updateOdometry();
   }
 }
