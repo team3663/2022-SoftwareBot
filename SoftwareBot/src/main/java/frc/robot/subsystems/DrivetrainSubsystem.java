@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.helpers.Pigeon;
 
 import static frc.robot.Constants.*;
 
@@ -55,7 +56,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private Pose2d pose = new Pose2d();
   */
 
-  private final PigeonIMU pigeon = new PigeonIMU(DRIVETRAIN_PIGEON_ID);
+  private final Pigeon pigeon = new Pigeon(DRIVETRAIN_PIGEON_ID);
         // counter-clockwise rotation increases angle
   //private final AHRS m_navx = new AHRS(SPI.Port.kMXP, (byte) 200); // Cannot resolve SPI
 
@@ -144,15 +145,13 @@ ShuffleboardLayout driveSignalContainer = drivebaseTab.getLayout("Drive Signal",
   }
 
   public void zeroGyroscope() {
-          pigeon.setFusedHeading(0.0);
+          pigeon.reset();
           // m_navx.zeroYaw();
   }
 
   public Rotation2d getGyroscopeRotation() {
-    return Rotation2d.fromDegrees(pigeon.getFusedHeading());
+    return Rotation2d.fromDegrees(pigeon.getAngle());
     // FIXME compass turns 180 when robot rotates by 90 (may be fixed by gear ratio)
-
-    // changed from fromDegrees to fromRadians while writing updateOdometry, not sure if this would cause problems 
 
     /* 
    if (m_navx.isMagnetometerCalibrated()) {
