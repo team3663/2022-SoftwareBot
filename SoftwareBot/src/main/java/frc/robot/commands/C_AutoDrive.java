@@ -1,4 +1,4 @@
-package frc.robot.commands;
+/* package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,6 +14,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
 import frc.robot.subsystems.SS_Drivebase;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Translation2d;
+
 
 public class C_AutoDrive extends CommandBase {
 
@@ -50,8 +53,8 @@ public class C_AutoDrive extends CommandBase {
    * @param targetTranslation inches for the robot to travel, negative inches are backwards
    * @param translationPercentOutput the maximum percent output for translation
    * @param rotation angle to turn to in radians
-   * @param rotationPercentOutput the maximum percent output for rotation
-   */
+   * @param rotationPercentOutput the maximum percent output for rotation */
+   
   public C_AutoDrive(Translation2d targetTranslation, double translationPercentOutput, double targetRotation, double rotationPercentOutput) {
     this.targetTranslation = targetTranslation;
     this.targetRotation = targetRotation;
