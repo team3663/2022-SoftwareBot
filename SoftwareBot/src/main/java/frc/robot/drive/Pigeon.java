@@ -35,22 +35,18 @@ public class Pigeon implements Gyro, Accelerometer {
         pigeon = new PigeonIMU(id);
     }
 
-    // get gyro
-    @Override
-    public double getAngle() {
-        angle = pigeon.getFusedHeading();
-        return angle;
-    }
-
-    @Override
-    public void close() throws Exception {
-    }
-
     // enter boot-calibration (gyro and temp), can also be done in phoenix tuner
     @Override
     public void calibrate() {
         pigeon.enterCalibrationMode(CalibrationMode.BootTareGyroAccel);
         
+    }
+
+    // get gyro
+    @Override
+    public double getAngle() {
+        angle = pigeon.getFusedHeading();
+        return angle;
     }
 
     // reset gyro
@@ -101,6 +97,11 @@ public class Pigeon implements Gyro, Accelerometer {
         pigeon.getAccelerometerAngles(tiltAngle);
         accelZ = Math.sin(Math.toRadians(tiltAngle[2]));
         return accelZ;
+    }
+
+    // specify exception
+    @Override
+    public void close() throws Exception {
     }
 
 
