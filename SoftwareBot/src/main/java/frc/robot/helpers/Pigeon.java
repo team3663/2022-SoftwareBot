@@ -55,7 +55,7 @@ public class Pigeon implements Gyro, Accelerometer {
         pigeon.setFusedHeading(0);
     }
 
-    // gyro rate in degree/ms
+    // gyro rate in degree/s
     // call in drivebase periodic to get continuous update
     // assume constant rotation speed
     @Override

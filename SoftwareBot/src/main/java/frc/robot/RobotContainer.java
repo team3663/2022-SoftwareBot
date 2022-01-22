@@ -12,6 +12,7 @@ public class RobotContainer {
 
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   private final XboxController controller = new XboxController(0);
+  public boolean isSnap = true;
 
   public RobotContainer() {
     drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
@@ -25,7 +26,8 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
-    new Button(controller::getBackButton).whenPressed(drivetrainSubsystem::zeroGyroscope);
+    new Button(controller::getBackButton).whenPressed(drivetrainSubsystem::resetGyroscope);
+    new Button(controller::getStartButton).whenPressed(drivetrainSubsystem::resetPosition);
   }
 
   // FIXME add autonomous
@@ -35,7 +37,7 @@ public class RobotContainer {
 
   private static double deadband(double value, double deadband) {
     if (Math.abs(value) > deadband) {
-      if (value > 0.0) {
+      if (value > 0.1) {
         return (value - deadband) / (1.0 - deadband);
       } else {
         return (value + deadband) / (1.0 - deadband);
@@ -46,7 +48,7 @@ public class RobotContainer {
   }
 
   private static double modifyAxis(double value) {
-    value = deadband(value, 0.0);
+    value = deadband(value, 0.1);
     value = Math.copySign(value * value, value);
 
     return value;

@@ -6,6 +6,7 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 
 import java.util.function.DoubleSupplier;
 
+// FIXME add snap rotation (probably has to move part of the xbox controller input here from the robotcontainer)
 public class DefaultDriveCommand extends CommandBase {
     private final DrivetrainSubsystem drivetrainSubsystem;
 
@@ -23,6 +24,11 @@ public class DefaultDriveCommand extends CommandBase {
         this.rotationSupplier = rotationSupplier;
 
         addRequirements(drivetrainSubsystem);
+    }
+
+    @Override
+    public void initialize() {
+            drivetrainSubsystem.resetGyroscope();
     }
 
     @Override
