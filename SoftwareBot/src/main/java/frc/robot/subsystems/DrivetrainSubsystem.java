@@ -57,6 +57,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
+  private double snapTargetAngle = 361;
+
   NetworkTableEntry poseXEntry;
   NetworkTableEntry poseYEntry;
   NetworkTableEntry poseAngleEntry;
@@ -150,7 +152,17 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
-    this.chassisSpeeds = chassisSpeeds;
+          if (snapTargetAngle != 361)
+          {
+                  this.chassisSpeeds = new ChassisSpeeds(0, 0, 0.3);
+          }
+        else {
+                this.chassisSpeeds = chassisSpeeds;
+        }
+  }
+
+  public void setSnapTargetAngle(double snapTargetAngle) {
+          this.snapTargetAngle = snapTargetAngle;
   }
 
 @Override
@@ -165,6 +177,12 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
     backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());
     
     odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
+
+    if (snapTargetAngle != 361){
+            if (Math.abs(getPose().getRotation().getDegrees()) < 2) {
+                    snapTargetAngle = 361;
+            }
+    }
 
     driveSignalYEntry.setDouble(chassisSpeeds.vyMetersPerSecond);
     driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond);

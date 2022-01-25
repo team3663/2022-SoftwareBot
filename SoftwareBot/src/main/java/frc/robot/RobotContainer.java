@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -12,7 +14,7 @@ public class RobotContainer {
 
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   private final XboxController controller = new XboxController(0);
-  public boolean isSnap = true;
+  private double snapTargetAngle = 361;
 
   public RobotContainer() {
     drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
@@ -28,6 +30,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
     new Button(controller::getBackButton).whenPressed(drivetrainSubsystem::resetGyroscope);
     new Button(controller::getStartButton).whenPressed(drivetrainSubsystem::resetPosition);
+    new Button(getDPad()).whenPressed(() -> drivetrainSubsystem.setSnapTargetAngle(snapTargetAngle));
   }
 
   // FIXME add autonomous
@@ -52,5 +55,11 @@ public class RobotContainer {
     value = Math.copySign(value * value, value);
 
     return value;
+  }
+
+  private BooleanSupplier getDPad() {
+    snapTargetAngle = 360 - controller.getPOV();
+    BooleanSupplier isSnap = () -> (snapTargetAngle != 361);
+    return isSnap;
   }
 }
