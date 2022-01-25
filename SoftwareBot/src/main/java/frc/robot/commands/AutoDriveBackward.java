@@ -22,7 +22,8 @@ public class AutoDriveBackward extends CommandBase {
 
   @Override
   public void execute() {
-    drivetrainSubsystem.drive(new ChassisSpeeds(-0.3, 0, 0));
+    drivetrainSubsystem.drive(ChassisSpeeds.fromFieldRelativeSpeeds(0.3, 0, 0,
+                                  drivetrainSubsystem.getGyroscopeRotation()));
   }
 
   @Override
