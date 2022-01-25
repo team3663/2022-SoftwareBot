@@ -6,11 +6,11 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 
 public class AutoDriveBackward extends CommandBase {
   private final DrivetrainSubsystem drivetrainSubsystem;
-  double targetXTranslation;
+  double targetYTranslation;
 
-  public AutoDriveBackward(DrivetrainSubsystem drivetrainSubsystem, double targetXTranslation) {
+  public AutoDriveBackward(DrivetrainSubsystem drivetrainSubsystem, double targetYranslation) {
     this.drivetrainSubsystem = drivetrainSubsystem;
-    this.targetXTranslation = targetXTranslation;
+    this.targetYTranslation = targetYTranslation;
 
     addRequirements(drivetrainSubsystem);
   }
@@ -32,6 +32,6 @@ public class AutoDriveBackward extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return (Math.abs(drivetrainSubsystem.getPose().getX() - targetXTranslation) < 0.1);
+    return (Math.abs(drivetrainSubsystem.getPose().getY() - targetYTranslation) < 0.1);
   }
 }
