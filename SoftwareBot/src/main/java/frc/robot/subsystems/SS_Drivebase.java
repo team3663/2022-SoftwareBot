@@ -10,11 +10,14 @@ import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -25,8 +28,8 @@ import static frc.robot.Constants.*;
 
 public class SS_Drivebase extends SubsystemBase {
 
-        private static SS_Drivebase instance;
-        private double[] zero = new double[3];
+        
+        
         //private static PIDController pidController = new PIDController(kp, ki, kd);
 
   /**
@@ -85,7 +88,20 @@ public class SS_Drivebase extends SubsystemBase {
   private final SwerveModule m_backLeftModule;
   private final SwerveModule m_backRightModule;
 
+  private Object kinematicsLock = new Object();
+  private Object stateLock = new Object();
+  private static SS_Drivebase instance;
+
+  private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
+          new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
+          new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0),
+          new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
+          new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0));
+
+  private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(), new Pose2d());
+
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
+  private Pose2d pose = new Pose2d(0,0, null);
 
   public SS_Drivebase() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
@@ -190,7 +206,21 @@ public class SS_Drivebase extends SubsystemBase {
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
-    m_chassisSpeeds = chassisSpeeds;
+          synchronized(stateLock){
+                m_chassisSpeeds = chassisSpeeds;
+          }
+  }
+
+  public void resetPoseTranslation() {
+        synchronized(kinematicsLock) {
+            odometry.resetPosition(new Pose2d(), new Rotation2d());
+
+        }
+    }
+  public Pose2d getPose(){
+          synchronized(kinematicsLock){
+                  return pose;
+          }
   }
 
   @Override
@@ -198,10 +228,13 @@ public class SS_Drivebase extends SubsystemBase {
     SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
 
+
     m_frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[0].angle.getRadians());
     m_frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians());
     m_backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
     m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());
+
+    odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
   }
 
   public static SS_Drivebase getInstance() {

@@ -10,22 +10,28 @@ import org.frcteam2910.common.math.RigidTransform2;
 import org.frcteam2910.common.math.Vector2;
 import org.frcteam2910.common.util.HolonomicDriveSignal;*/
 
+
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.drive.Vector2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
 import frc.robot.subsystems.SS_Drivebase;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 
 public class C_AutoDrive extends CommandBase {
 
-  private SS_Drivebase drivebase = SS_Drivebase.getInstance();
+  private SS_Drivebase drivebase;
 
   //private Vector2 targetTranslation;
   private Translation2d targetTranslation;
   private double targetRotation;
 
+// TODO tune pid with Yvonne
   private double translationKp = .013;
   private double translationKi = 0;
   private double translationKd = 0;
@@ -38,15 +44,19 @@ public class C_AutoDrive extends CommandBase {
 
   private PIDController translationController = new PIDController(translationKp, translationKi, translationKd);
   private double translationPercentTolerance = .025;
-
+  
   private PIDController rotationController = new PIDController(rotationKp, rotationKi, rotationKd);
   private double rotationPercentTolerance = .01;
 
   private double currentAngle;
-  private RigidTransform2 currentPose;
+  private Pose2d currentPose;
+
 
   private double translationSpeed;
   private double rotationSpeed;
+
+  private double translationPercentOutput;
+  private double rotationPercentOutput;
 
   /**
    * @param drivebase the drivebase subsystem
@@ -55,18 +65,24 @@ public class C_AutoDrive extends CommandBase {
    * @param rotation angle to turn to in radians
    * @param rotationPercentOutput the maximum percent output for rotation */
    
-  public C_AutoDrive(Translation2d targetTranslation, double translationPercentOutput, double targetRotation, double rotationPercentOutput) {
+  public C_AutoDrive(SS_Drivebase drivebase, Translation2d targetTranslation, double translationPercentOutput, double targetRotation, double rotationPercentOutput) {
+    this.drivebase = drivebase;
     this.targetTranslation = targetTranslation;
     this.targetRotation = targetRotation;
     addRequirements(drivebase);
+    this.translationPercentOutput = translationPercentOutput;
+    this.rotationPercentOutput = rotationPercentOutput;
+    //finds hypot of the translation and sets its desired point to it
+    translationController.setSetpoint(targetTranslation.getNorm());
 
-    translationController.setSetpoint(targetTranslation.length);
-    translationController.setOutputRange(-translationPercentOutput, translationPercentOutput);
     
+    //sets the desired angle 
     rotationController.setSetpoint(targetRotation);
-    rotationController.setInputRange(0, 2 * Math.PI);
-    rotationController.setContinuous(true);
-    rotationController.setOutputRange(-rotationPercentOutput, rotationPercentOutput);
+    //rotationController.setInputRange(0, 2 * Math.PI);
+    //combines the previous methods setInputRange and setContinuous
+    rotationController.enableContinuousInput(0, 2 * Math.PI);
+
+    
   }
 
   @Override
@@ -76,30 +92,44 @@ public class C_AutoDrive extends CommandBase {
 
   @Override
   public void execute() {
-    currentPose = drivebase.getPose();
-    currentAngle = currentPose.rotation.toRadians();
-
-    translationSpeed = translationController.calculate(Math.hypot(currentPose.translation.x, currentPose.translation.y));
-    Translation2d translationVector = Translation2d.fromAngle(targetTranslation.getAngle()).normal().scale(translationSpeed);
-
-    rotationSpeed = rotationController.calculate(currentAngle);
     
-    drivebase.drive(translationVector, rotationSpeed, true);
+
+    currentPose = drivebase.getPose();
+    currentAngle = currentPose.getRotation().getRadians();
+    translationSpeed = translationController.calculate(currentPose.getTranslation().getNorm()) * translationPercentOutput;
+    //second translation speed
+    double tSpeed = Math.max(-1, Math.min(translationSpeed, 1));
+    
+    // this line is the attempt at recreating the old code
+    Translation2d translationVector = targetTranslation.div(targetTranslation.getNorm()).times(translationSpeed);
+    //.times(1 / targetTranslation.getNorm()).times(translationSpeed);
+    //TODO scale to translationSpeed
+      //targetTranslation.getX() / targetTranslation.getNorm()) 
+
+      //this line is from the original code
+    //Vector2 translationVector = Vector2.fromAngle(targetTranslation.getAngle()).normal().scale(translationSpeed);
+
+    rotationSpeed = rotationController.calculate(currentAngle) * rotationPercentOutput;
+    //second rotation speed
+    double rSpeed = Math.max(-1, Math.min(rotationSpeed, 1));
+    
+    drivebase.drive(new ChassisSpeeds(translationVector.getX(), translationVector.getY(), rSpeed));
   }
 
   @Override
   public void end(boolean interrupted) {
-    drivebase.drive(new HolonomicDriveSignal(new Translation2d(0.0, 0.0), 0.0, false));
+    //drives a ChassisSpeeds with all values being zero
+    drivebase.drive(new ChassisSpeeds(0.0, 0.0, 0.0));
   }
 
   @Override
   public boolean isFinished() {
     return ((Math.abs(targetRotation - currentAngle) <= 2 * Math.PI * rotationPercentTolerance ||
         targetRotation == 0.0) &&
-        (Math.abs(targetTranslation.y - currentPose.translation.y) <= targetTranslation.y * translationPercentTolerance ||
-        targetTranslation.y == 0.0)&&
-        (Math.abs(targetTranslation.x - currentPose.translation.x) <= targetTranslation.x * translationPercentTolerance ||
-        targetTranslation.x == 0.0))
+        (Math.abs(targetTranslation.getY() - currentPose.getY()) <= targetTranslation.getY() * translationPercentTolerance ||
+        targetTranslation.getY() == 0.0)&&
+        (Math.abs(targetTranslation.getX() - currentPose.getX()) <= targetTranslation.getX() * translationPercentTolerance ||
+        targetTranslation.getX() == 0.0))
         ||(translationSpeed <= .001 && rotationSpeed <= .0005);
   }
 }
