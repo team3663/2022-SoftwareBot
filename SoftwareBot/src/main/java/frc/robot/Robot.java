@@ -31,10 +31,11 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    autonomousCommand = robotContainer.getAutonomousCommand();
-    if (autonomousCommand != null) {
-      autonomousCommand.schedule();
+    if (autonomousCommand != null){
+      autonomousCommand.cancel();
     }
+    autonomousCommand = robotContainer.getAutonomousCommand();
+    CommandScheduler.getInstance().schedule(false, autonomousCommand);
   }
 
   /** This function is called periodically during autonomous. */

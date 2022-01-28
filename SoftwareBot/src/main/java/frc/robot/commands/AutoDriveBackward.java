@@ -6,11 +6,11 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 
 public class AutoDriveBackward extends CommandBase {
   private final DrivetrainSubsystem drivetrainSubsystem;
-  double targetYTranslation;
+  double targetXTranslation;
 
-  public AutoDriveBackward(DrivetrainSubsystem drivetrainSubsystem, double targetYranslation) {
+  public AutoDriveBackward(DrivetrainSubsystem drivetrainSubsystem, double targetXTranslation) {
     this.drivetrainSubsystem = drivetrainSubsystem;
-    this.targetYTranslation = targetYTranslation;
+    this.targetXTranslation = targetXTranslation;
 
     addRequirements(drivetrainSubsystem);
   }
@@ -22,7 +22,7 @@ public class AutoDriveBackward extends CommandBase {
 
   @Override
   public void execute() {
-    drivetrainSubsystem.drive(ChassisSpeeds.fromFieldRelativeSpeeds(0.3, 0, 0,
+    drivetrainSubsystem.drive(ChassisSpeeds.fromFieldRelativeSpeeds(-0.3, 0, 0,
                                   drivetrainSubsystem.getGyroscopeRotation()));
   }
 
@@ -33,6 +33,10 @@ public class AutoDriveBackward extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return (Math.abs(drivetrainSubsystem.getPose().getY() - targetYTranslation) < 0.1);
+    double difference = Math.abs(drivetrainSubsystem.getPose().getX() - targetXTranslation);
+    System.out.println("targetX: " + targetXTranslation);
+    System.out.println("currentX: " + drivetrainSubsystem.getPose().getX());
+    System.out.println("difference: " + difference);
+    return (difference < 0.01);
   }
 }

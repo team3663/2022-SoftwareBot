@@ -152,13 +152,15 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
+          /*
           if (snapTargetAngle != 361)
           {
                   this.chassisSpeeds = new ChassisSpeeds(0, 0, 0.3);
           }
         else {
+                */
                 this.chassisSpeeds = chassisSpeeds;
-        }
+        //}
   }
 
   public void setSnapTargetAngle(double snapTargetAngle) {
