@@ -42,17 +42,6 @@ public class DefaultDriveCommand extends CommandBase {
                 )
         );
 
-        // robot oriented
-        /*
-        drivetrainSubsystem.drive(
-                ChassisSpeeds(
-                        translationXSupplier.getAsDouble(),
-                        translationYSupplier.getAsDouble(),
-                        rotationSupplier.getAsDouble(),
-                )
-        );
-        */
-
     }
 
     @Override

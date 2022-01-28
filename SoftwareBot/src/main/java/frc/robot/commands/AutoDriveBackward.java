@@ -34,9 +34,6 @@ public class AutoDriveBackward extends CommandBase {
   @Override
   public boolean isFinished() {
     double difference = Math.abs(drivetrainSubsystem.getPose().getX() - targetXTranslation);
-    System.out.println("targetX: " + targetXTranslation);
-    System.out.println("currentX: " + drivetrainSubsystem.getPose().getX());
-    System.out.println("difference: " + difference);
     return (difference < 0.01);
   }
 }

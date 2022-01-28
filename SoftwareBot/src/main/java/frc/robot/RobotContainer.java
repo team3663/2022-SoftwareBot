@@ -34,11 +34,11 @@ public class RobotContainer {
   private void configureButtonBindings() {
     new Button(controller::getBackButton).whenPressed(drivetrainSubsystem::resetGyroscope);
     new Button(controller::getStartButton).whenPressed(drivetrainSubsystem::resetPosition);
-    new Button(getDPad()).whenPressed(() -> drivetrainSubsystem.setSnapTargetAngle(snapTargetAngle));
   }
 
   public Command getAutonomousCommand() {
     return new AutonomousDriveCommand(drivetrainSubsystem, new Translation2d(-2, 0), 0.3, new Rotation2d(), 0);
+    // return new AutoDriveBackward(drivetrainSubsystem, -2);
   }
 
   private static double deadband(double value, double deadband) {

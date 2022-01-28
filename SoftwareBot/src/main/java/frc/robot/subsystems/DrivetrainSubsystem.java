@@ -55,9 +55,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final SwerveModule backLeftModule;
   private final SwerveModule backRightModule;
 
+  private final Object stateLock = new Object();
   private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
-
-  private double snapTargetAngle = 361;
 
   NetworkTableEntry poseXEntry;
   NetworkTableEntry poseYEntry;
@@ -152,19 +151,11 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
-          /*
-          if (snapTargetAngle != 361)
-          {
-                  this.chassisSpeeds = new ChassisSpeeds(0, 0, 0.3);
+          synchronized (stateLock) {
+          this.chassisSpeeds = chassisSpeeds;
+          System.out.println("chassis: " + chassisSpeeds.vxMetersPerSecond);
           }
-        else {
-                */
-                this.chassisSpeeds = chassisSpeeds;
-        //}
-  }
 
-  public void setSnapTargetAngle(double snapTargetAngle) {
-          this.snapTargetAngle = snapTargetAngle;
   }
 
 @Override
@@ -180,12 +171,6 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
     
     odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
 
-    if (snapTargetAngle != 361){
-            if (Math.abs(getPose().getRotation().getDegrees()) < 2) {
-                    snapTargetAngle = 361;
-            }
-    }
-
     driveSignalYEntry.setDouble(chassisSpeeds.vyMetersPerSecond);
     driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond);
     driveSignalRotationEntry.setDouble(chassisSpeeds.omegaRadiansPerSecond);
@@ -193,5 +178,7 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
     poseXEntry.setDouble(getPose().getTranslation().getX());
     poseYEntry.setDouble(getPose().getTranslation().getY());
     poseAngleEntry.setDouble(getPose().getRotation().getDegrees());
+
+    System.out.println("drive signal: " + chassisSpeeds.vxMetersPerSecond);
   }
 }
