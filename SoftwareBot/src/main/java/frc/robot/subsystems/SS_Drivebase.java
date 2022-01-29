@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.robot.drivers.Pigeon;
 
 import static frc.robot.Constants.*;
 
@@ -77,7 +77,6 @@ public class SS_Drivebase extends SubsystemBase {
   // By default we use a Pigeon for our gyroscope. But if you use another gyroscope, like a NavX, you can change this.
   // The important thing about how you configure your gyroscope is that rotating the robot counter-clockwise should
   // cause the angle reading to increase until it wraps back over to zero.
-  // FIXME Remove if you are using a Pigeon
   private final PigeonIMU m_pigeon = new PigeonIMU(DRIVETRAIN_PIGEON_ID);
   // FIXME Uncomment if you are using a NavX
 //  private final AHRS m_navx = new AHRS(SPI.Port.kMXP, (byte) 200); // NavX connected over MXP
@@ -90,6 +89,7 @@ public class SS_Drivebase extends SubsystemBase {
 
   private Object kinematicsLock = new Object();
   private Object stateLock = new Object();
+  private Object sensorLock = new Object();
   private static SS_Drivebase instance;
 
   private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
@@ -209,6 +209,13 @@ public class SS_Drivebase extends SubsystemBase {
           synchronized(stateLock){
                 m_chassisSpeeds = chassisSpeeds;
           }
+  }
+
+  //TODO create resetGyroAngle method with pigeonimu
+  public void resetGyroAngle(Rotation2d rotation2d){
+          synchronized(sensorLock){
+                  m_pigeon.setFusedHeading(0);
+        }
   }
 
   public void resetPoseTranslation() {

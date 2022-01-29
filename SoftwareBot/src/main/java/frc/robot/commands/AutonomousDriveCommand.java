@@ -61,7 +61,7 @@ public class AutonomousDriveCommand extends CommandBase {
 
   @Override
   public void initialize(){
-    drivetrainSubsystem.resetPosition();
+    drivetrainSubsystem.resetPoseTranslation();
   }
 
   @Override

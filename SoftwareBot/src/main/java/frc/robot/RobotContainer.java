@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -12,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.subsystems.SS_Drivebase;
+import frc.robot.commands.C_AutoDrive;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -66,8 +69,10 @@ public class RobotContainer {
   public SequentialCommandGroup getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
     return new SequentialCommandGroup(
-      new InstantCommand(() -> drivebase.resetGyroAngle(Rotation2.fromDegrees(180)), drivebase),\
-      new C_AutoDrive(new Vector2(-36.0, 0.0), 1.0, Math.toRadians(180), 1.0)
+      new InstantCommand(() -> m_drivetrainSubsystem.resetGyroAngle(Rotation2d.fromDegrees(180)), m_drivetrainSubsystem),
+      new C_AutoDrive(m_drivetrainSubsystem, new Translation2d(), 1.0, Math.toRadians(180), 1.0)
+      //TODO add requirements for C_AutoDrive in SequentialCommandGroup
+      //check SS_DriveBase for todo on resetGyroAngle method
     );
   }
 
