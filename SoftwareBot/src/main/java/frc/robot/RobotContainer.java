@@ -1,12 +1,12 @@
 package frc.robot;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import frc.robot.commands.AutoDriveBackward;
 import frc.robot.commands.AutonomousDriveCommand;
@@ -18,7 +18,6 @@ public class RobotContainer {
 
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
   private final XboxController controller = new XboxController(0);
-  private double snapTargetAngle = 361;
 
   public RobotContainer() {
     drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
@@ -37,7 +36,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return new AutonomousDriveCommand(drivetrainSubsystem, new Translation2d(-2, 0), 0.3, new Rotation2d(), 0);
+    return new AutonomousDriveCommand(drivetrainSubsystem, new Translation2d(-2, 0), new Rotation2d());
     // return new AutoDriveBackward(drivetrainSubsystem, -2);
   }
 
@@ -58,11 +57,5 @@ public class RobotContainer {
     value = Math.copySign(value * value, value);
 
     return value;
-  }
-
-  private BooleanSupplier getDPad() {
-    snapTargetAngle = 360 - controller.getPOV();
-    BooleanSupplier isSnap = () -> (snapTargetAngle != 361);
-    return isSnap;
   }
 }

@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
@@ -25,13 +26,15 @@ import static frc.robot.Constants.*;
 public class DrivetrainSubsystem extends SubsystemBase {
 
   public static final double MAX_VOLTAGE = 12.0;
-  
+  public static final double WHEEL_DIAMETER_METERS = 0.1016;
+
   public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
-          SdsModuleConfigurations.MK3_STANDARD.getDriveReduction() *
-          SdsModuleConfigurations.MK3_STANDARD.getWheelDiameter() * Math.PI;
+          SdsModuleConfigurations.MK4_L4.getDriveReduction() * WHEEL_DIAMETER_METERS * Math.PI;
 
   public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND /
           Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
+
+  public static final double METERS_TO_ROBOT_METERS_RATIO = 1;
 
   private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
           // Front left
@@ -45,17 +48,17 @@ public class DrivetrainSubsystem extends SubsystemBase {
   );
 
   private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(), new Pose2d());
+  private double accumulatedChassisAngle = 0;
+  private double time = 0;
 
   private final Pigeon pigeon = new Pigeon(DRIVETRAIN_PIGEON_ID);
         // counter-clockwise rotation increases angle
-  //private final AHRS m_navx = new AHRS(SPI.Port.kMXP, (byte) 200); // Cannot resolve SPI
 
   private final SwerveModule frontLeftModule;
   private final SwerveModule frontRightModule;
   private final SwerveModule backLeftModule;
   private final SwerveModule backRightModule;
 
-  private final Object stateLock = new Object();
   private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
   NetworkTableEntry poseXEntry;
@@ -151,11 +154,12 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
-          synchronized (stateLock) {
+          /*
+          double vx_robotmeters = chassisSpeeds.vxMetersPerSecond / METERS_TO_ROBOT_METERS_RATIO;
+          double vy_robotmeters = chassisSpeeds.vyMetersPerSecond / METERS_TO_ROBOT_METERS_RATIO;
+          double vo = chassisSpeeds.omegaRadiansPerSecond;
+          this.chassisSpeeds = new ChassisSpeeds(vx_robotmeters, vy_robotmeters, vo);*/
           this.chassisSpeeds = chassisSpeeds;
-          System.out.println("chassis: " + chassisSpeeds.vxMetersPerSecond);
-          }
-
   }
 
 @Override
@@ -171,14 +175,20 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
     
     odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
 
-    driveSignalYEntry.setDouble(chassisSpeeds.vyMetersPerSecond);
-    driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond);
+    double currentTime = Timer.getFPGATimestamp();
+    double lastTime = time;
+    double dt = currentTime - lastTime;
+    accumulatedChassisAngle = Math.toDegrees(accumulatedChassisAngle + chassisSpeeds.omegaRadiansPerSecond * dt);
+
+    if (accumulatedChassisAngle - getGyroscopeRotation().getDegrees() > 0) {
+    }
+
+    driveSignalYEntry.setDouble(chassisSpeeds.vyMetersPerSecond * METERS_TO_ROBOT_METERS_RATIO);
+    driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond * METERS_TO_ROBOT_METERS_RATIO);
     driveSignalRotationEntry.setDouble(chassisSpeeds.omegaRadiansPerSecond);
 
     poseXEntry.setDouble(getPose().getTranslation().getX());
     poseYEntry.setDouble(getPose().getTranslation().getY());
     poseAngleEntry.setDouble(getPose().getRotation().getDegrees());
-
-    System.out.println("drive signal: " + chassisSpeeds.vxMetersPerSecond);
   }
 }

@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 
-/** Add your docs here. */
 public class Pigeon implements Gyro, Accelerometer {
 
     PigeonIMU pigeon;

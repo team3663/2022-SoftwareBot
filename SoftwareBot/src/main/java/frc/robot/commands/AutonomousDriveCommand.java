@@ -15,9 +15,9 @@ public class AutonomousDriveCommand extends CommandBase {
   private Rotation2d targetRotation;
 
   // TODO tune pid
-  private PIDController translationXController = new PIDController(0.7, 0, 0);
-  private PIDController translationYController = new PIDController(0.5, 0, 0);
-  private PIDController rotationController = new PIDController(0.5, 0, 0);
+  private PIDController translationXController = new PIDController(0.6, 0, 0); //10
+  private PIDController translationYController = new PIDController(0, 0, 0);
+  private PIDController rotationController = new PIDController(0, 0, 0);
 
   private Pose2d currentPose;
   private double currentAngle;
@@ -28,32 +28,20 @@ public class AutonomousDriveCommand extends CommandBase {
   private double translationYSpeed;
   private double rotationSpeed;
 
-  private double translationPercentOutput;
-  private double rotationPercentOutput;
-
   private DrivetrainSubsystem drivetrainSubsystem;
 
-  public AutonomousDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
-                                Translation2d targetTranslation, double translationPercentOutput,
-                                Rotation2d targetRotation, double rotationPercentOutput) {
+  public AutonomousDriveCommand(DrivetrainSubsystem drivetrainSubsystem, Translation2d targetTranslation, Rotation2d targetRotation) {
       this.drivetrainSubsystem = drivetrainSubsystem;
       addRequirements(drivetrainSubsystem);
       
       this.targetTranslation = targetTranslation;
       this.targetRotation = targetRotation;
       
-      this.translationPercentOutput = translationPercentOutput;
-      this.rotationPercentOutput = rotationPercentOutput;
-      
-      translationXController.setSetpoint(targetTranslation.getX());
-      translationXController.setTolerance(0.1);
-
+      translationXController.setSetpoint(targetTranslation.getX()); 
       translationYController.setSetpoint(targetTranslation.getY());
-      translationYController.setTolerance(0.1);
 
       rotationController.setSetpoint(targetRotation.getRadians());
       rotationController.enableContinuousInput(0, 2 * Math.PI);
-      rotationController.setTolerance(0.1);
   }
 
   @Override
@@ -72,13 +60,11 @@ public class AutonomousDriveCommand extends CommandBase {
     translationYSpeed = cap(translationYController.calculate(currentY));
     rotationSpeed = cap(rotationController.calculate(currentAngle));
 
-    System.out.println("calculated speed: " + translationXSpeed);
-
     drivetrainSubsystem.drive(new ChassisSpeeds(translationXSpeed, translationYSpeed, rotationSpeed));
   }
 
   private double cap(double value) {
-    return Math.max(-1, Math.min(value, 1));
+    return Math.max(-2, Math.min(value, 2));
   }
 
   @Override
@@ -88,6 +74,6 @@ public class AutonomousDriveCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return translationXController.atSetpoint() && translationYController.atSetpoint() && rotationController.atSetpoint();
+    return false;
   }
 }
