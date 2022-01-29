@@ -34,8 +34,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND /
           Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
 
-  public static final double METERS_TO_ROBOT_METERS_RATIO = 1;
-
   private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
           // Front left
           new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
@@ -48,8 +46,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
   );
 
   private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(), new Pose2d());
-  private double accumulatedChassisAngle = 0;
-  private double time = 0;
 
   private final Pigeon pigeon = new Pigeon(DRIVETRAIN_PIGEON_ID);
         // counter-clockwise rotation increases angle
@@ -154,11 +150,6 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
-          /*
-          double vx_robotmeters = chassisSpeeds.vxMetersPerSecond / METERS_TO_ROBOT_METERS_RATIO;
-          double vy_robotmeters = chassisSpeeds.vyMetersPerSecond / METERS_TO_ROBOT_METERS_RATIO;
-          double vo = chassisSpeeds.omegaRadiansPerSecond;
-          this.chassisSpeeds = new ChassisSpeeds(vx_robotmeters, vy_robotmeters, vo);*/
           this.chassisSpeeds = chassisSpeeds;
   }
 
@@ -175,16 +166,8 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
     
     odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
 
-    double currentTime = Timer.getFPGATimestamp();
-    double lastTime = time;
-    double dt = currentTime - lastTime;
-    accumulatedChassisAngle = Math.toDegrees(accumulatedChassisAngle + chassisSpeeds.omegaRadiansPerSecond * dt);
-
-    if (accumulatedChassisAngle - getGyroscopeRotation().getDegrees() > 0) {
-    }
-
-    driveSignalYEntry.setDouble(chassisSpeeds.vyMetersPerSecond * METERS_TO_ROBOT_METERS_RATIO);
-    driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond * METERS_TO_ROBOT_METERS_RATIO);
+    driveSignalYEntry.setDouble(chassisSpeeds.vyMetersPerSecond);
+    driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond);
     driveSignalRotationEntry.setDouble(chassisSpeeds.omegaRadiansPerSecond);
 
     poseXEntry.setDouble(getPose().getTranslation().getX());
