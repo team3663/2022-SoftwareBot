@@ -8,9 +8,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Button;
-import frc.robot.commands.AutoDriveBackward;
 import frc.robot.commands.AutonomousDriveCommand;
 import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.commands.RotateToCargoCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 // declare subsystems, commands, and button mappings
@@ -36,8 +36,8 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return new AutonomousDriveCommand(drivetrainSubsystem, new Translation2d(-2, 0), new Rotation2d());
-    // return new AutoDriveBackward(drivetrainSubsystem, -2);
+    // return new AutonomousDriveCommand(drivetrainSubsystem, new Translation2d(-2, 0), new Rotation2d());
+    return new RotateToCargoCommand(drivetrainSubsystem);
   }
 
   private static double deadband(double value, double deadband) {

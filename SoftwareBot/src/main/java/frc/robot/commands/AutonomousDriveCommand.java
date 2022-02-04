@@ -64,7 +64,7 @@ public class AutonomousDriveCommand extends CommandBase {
   }
 
   private double cap(double value) {
-    return Math.max(-2, Math.min(value, 2));
+    return Math.max(-1, Math.min(value, 1));
   }
 
   @Override

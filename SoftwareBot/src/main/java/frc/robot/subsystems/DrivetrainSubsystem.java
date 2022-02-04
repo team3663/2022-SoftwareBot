@@ -130,7 +130,6 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
                 driveSignalYEntry = driveSignalContainer.add("Drive Signal Strafe", 0.0).getEntry();
                 driveSignalXEntry = driveSignalContainer.add("Drive Signal Forward", 0.0).getEntry();
                 driveSignalRotationEntry = driveSignalContainer.add("Drive Signal Rotation", 0.0).getEntry();
-
   }
 
   public void resetPosition() {
