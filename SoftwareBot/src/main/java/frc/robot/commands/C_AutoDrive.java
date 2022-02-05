@@ -14,9 +14,12 @@ import org.frcteam2910.common.util.HolonomicDriveSignal;*/
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.SS_Drivebase;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.Trajectory;
 
 
 public class C_AutoDrive extends CommandBase {
@@ -28,21 +31,27 @@ public class C_AutoDrive extends CommandBase {
   private double targetRotation;
 
 // TODO tune pid with Yvonne
-  private double translationKp = .013;
-  private double translationKi = 0;
-  private double translationKd = 0;
+  // private double translationKp = .013;
+  // private double translationKi = 0;
+  // private double translationKd = 0;
   //private PidConstants translationConstants = new PidConstants(translationKp, translationKi, translationKd);
 
-  private double rotationKp = .0293;
-  private double rotationKi = 0;
-  private double rotationKd = 0;
+  // private double rotationKp = .0293;
+  // private double rotationKi = 0;
+  // private double rotationKd = 0;
   //private PidConstants rotationConstants = new PidConstants(rotationKp, rotationKi, rotationKd);
 
-  private PIDController translationController = new PIDController(translationKp, translationKi, translationKd);
+  private double b = 2.0;
+  private double zeta = 0.7;
+  //TODO tune these values
+
+  private RamseteController ramseteController = new RamseteController(b, zeta);
+
+  //private PIDController translationController = new PIDController(translationKp, translationKi, translationKd);
   private double translationPercentTolerance = .025;
   
-  private PIDController rotationController = new PIDController(rotationKp, rotationKi, rotationKd);
-  private double rotationPercentTolerance = .01;
+  //private PIDController rotationController = new PIDController(rotationKp, rotationKi, rotationKd);*/
+  private double rotationPercentTolerance = .01; 
 
   private double currentAngle;
   private Pose2d currentPose;
@@ -68,14 +77,21 @@ public class C_AutoDrive extends CommandBase {
     addRequirements(drivebase);
     this.translationPercentOutput = translationPercentOutput;
     this.rotationPercentOutput = rotationPercentOutput;
+
+    this.
     //finds hypot of the translation and sets its desired point to it
-    translationController.setSetpoint(targetTranslation.getNorm());
+    //translationController.setSetpoint(targetTranslation.getNorm());
+
 
     
     //sets the desired angle 
-    rotationController.setSetpoint(targetRotation);
+    //rotationController.setSetpoint(targetRotation);
     //rotationController.setInputRange(0, 2 * Math.PI);
     //combines the previous methods setInputRange and setContinuous
+
+    //TODO find how to setPoint and inputRange using ramseteController
+
+  
     rotationController.enableContinuousInput(0, 2 * Math.PI);
 
     
@@ -93,6 +109,14 @@ public class C_AutoDrive extends CommandBase {
     currentPose = drivebase.getPose();
     currentAngle = currentPose.getRotation().getRadians();
     translationSpeed = translationController.calculate(currentPose.getTranslation().getNorm()) * translationPercentOutput;
+
+    
+    Pose2d pose = new Pose2d()
+    ChassisSpeeds speeds = ramseteController.calculate(drivebase.getPose(), /*new Pose2d(targetTranslation.getX(), 
+    targetTranslation.getY(), Rotation2d.fromDegrees(targetRotation)) */ new Trajectory.State(double timeSeconds,
+double velocityMetersPerSecond, double accelerationMetersPerSecondSq, Pose2d poseMeters, double curvatureRadPerMeter));
+    //TODO find out what Trajectory.State is
+
     //second translation speed
     double tSpeed = Math.max(-1, Math.min(translationSpeed, 1));
     
