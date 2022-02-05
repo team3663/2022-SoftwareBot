@@ -41,6 +41,7 @@ public class C_AutoDrive extends CommandBase {
   // private double rotationKd = 0;
   //private PidConstants rotationConstants = new PidConstants(rotationKp, rotationKi, rotationKd);
 
+  // default values for Ramsete b=2.0, zeta=0.7
   private double b = 2.0;
   private double zeta = 0.7;
   //TODO tune these values
@@ -78,9 +79,8 @@ public class C_AutoDrive extends CommandBase {
     this.translationPercentOutput = translationPercentOutput;
     this.rotationPercentOutput = rotationPercentOutput;
 
-    this.
     //finds hypot of the translation and sets its desired point to it
-    //translationController.setSetpoint(targetTranslation.getNorm());
+    // translationController.setSetpoint(targetTranslation.getNorm());
 
 
     
