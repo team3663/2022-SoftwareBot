@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.*;
 
-public class SS_Drivebase extends SubsystemBase {
+public class DrivetrainSubsystem extends SubsystemBase {
 
         
         
@@ -88,7 +88,7 @@ public class SS_Drivebase extends SubsystemBase {
   private Object kinematicsLock = new Object();
   private Object stateLock = new Object();
   private Object sensorLock = new Object();
-  private static SS_Drivebase instance;
+  private static DrivetrainSubsystem instance;
 
   private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
           new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
@@ -103,7 +103,7 @@ public class SS_Drivebase extends SubsystemBase {
 
   private RamseteController controller = new RamseteController();
 
-  public SS_Drivebase() {
+  public DrivetrainSubsystem() {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
 
     // There are 4 methods you can call to create your swerve modules.
@@ -244,9 +244,9 @@ public class SS_Drivebase extends SubsystemBase {
     odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
   }
 
-  public static SS_Drivebase getInstance() {
+  public static DrivetrainSubsystem getInstance() {
         if (instance == null) {
-            instance = new SS_Drivebase();
+            instance = new DrivetrainSubsystembsystem();
         }
         return instance;
     }

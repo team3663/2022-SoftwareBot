@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.Vector2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
-import frc.robot.subsystems.SS_Drivebase;
+import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -35,9 +35,9 @@ public class AutonomousDriveCommand extends CommandBase {
   private double translationPercentOutput;
   private double rotationPercentOutput;
 
-  private SS_Drivebase drivetrainSubsystem;
+  private DrivetrainSubsystem drivetrainSubsystem;
 
-  public AutonomousDriveCommand(SS_Drivebase drivetrainSubsystem,
+  public AutonomousDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
                                 Translation2d targetTranslation, double translationPercentOutput,
                                 Rotation2d targetRotation, double rotationPercentOutput) {
       this.drivetrainSubsystem = drivetrainSubsystem;
