@@ -1,0 +1,4 @@
+X,Y,Tangent X,Tangent Y,Fixed Theta,Reversed,Name
+0.0,-05.60,1.0,0.0,true,false,startPoint
+0.5,-05.60,1.0,0.0,true,false,midPoint1
+1.0,-05.60,1.0,0.0,true,false,endPoint
