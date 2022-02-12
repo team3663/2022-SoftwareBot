@@ -28,11 +28,8 @@ import frc.robot.drivers.Pigeon;
 
 import static frc.robot.Constants.*;
 
-public class SS_Drivebase extends SubsystemBase {
-
-        
-        
-        //private static PIDController pidController = new PIDController(kp, ki, kd);
+public class DrivetrainSubsystem extends SubsystemBase {
+  // private static PIDController pidController = new PIDController(kp, ki, kd);
 
   /**
    * The maximum voltage that will be delivered to the drive motors.
@@ -94,7 +91,7 @@ public class SS_Drivebase extends SubsystemBase {
   private Object kinematicsLock = new Object();
   private Object stateLock = new Object();
   private Object sensorLock = new Object();
-  private static SS_Drivebase instance;
+  private static DrivetrainSubsystem instance;
 
   private SwerveDriveKinematics kinematics;
 
@@ -106,7 +103,11 @@ public class SS_Drivebase extends SubsystemBase {
 
   private RamseteController controller = new RamseteController();
 
+<<<<<<< HEAD:SoftwareBot/src/main/java/frc/robot/subsystems/SS_Drivebase.java
   public SS_Drivebase(SwerveDriveKinematics kinematics) {
+=======
+  public DrivetrainSubsystem() {
+>>>>>>> ece3efe34b1881c6816cc9caf72ed41e8e6c0858:SoftwareBot/src/main/java/frc/robot/subsystems/DrivetrainSubsystem.java
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
     this.kinematics = kinematics;
 
@@ -280,9 +281,9 @@ public class SS_Drivebase extends SubsystemBase {
     odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
   }
 
-  public static SS_Drivebase getInstance() {
+  public static DrivetrainSubsystem getInstance() {
         if (instance == null) {
-            instance = new SS_Drivebase();
+            instance = new DrivetrainSubsystembsystem();
         }
         return instance;
     }

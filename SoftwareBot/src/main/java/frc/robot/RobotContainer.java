@@ -13,23 +13,37 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+<<<<<<< HEAD
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
+=======
+// import edu.wpi.first.math.trajectory.TrajectoryConfig;
+// import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
+>>>>>>> ece3efe34b1881c6816cc9caf72ed41e8e6c0858
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
+// import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+<<<<<<< HEAD
 import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
+=======
+// import edu.wpi.first.wpilibj2.command.RamseteCommand;
+>>>>>>> ece3efe34b1881c6816cc9caf72ed41e8e6c0858
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import frc.robot.commands.DefaultDriveCommand;
+<<<<<<< HEAD
 import frc.robot.subsystems.SS_Drivebase;
 //import frc.robot.commands.C_AutoDrive;
 import frc.robot.paths.ExampleTrajectory;
+=======
+import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.commands.C_AutoDrive;
+>>>>>>> ece3efe34b1881c6816cc9caf72ed41e8e6c0858
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -39,8 +53,12 @@ import frc.robot.paths.ExampleTrajectory;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+<<<<<<< HEAD
   private final SS_Drivebase m_drivetrainSubsystem = SS_Drivebase.getInstance();
 
+=======
+  private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
+>>>>>>> ece3efe34b1881c6816cc9caf72ed41e8e6c0858
 
   private final XboxController m_controller = new XboxController(0);
 
@@ -58,9 +76,9 @@ public class RobotContainer {
     // Right stick X axis -> rotation
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
             m_drivetrainSubsystem,
-            () -> -modifyAxis(m_controller.getLeftY()) * SS_Drivebase.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(m_controller.getLeftX()) * SS_Drivebase.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(m_controller.getRightX()) * SS_Drivebase.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
+            () -> -modifyAxis(m_controller.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+            () -> -modifyAxis(m_controller.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+            () -> -modifyAxis(m_controller.getRightX()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
     ));
 
     // Configure the button bindings
@@ -84,6 +102,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public SequentialCommandGroup getAutonomousCommand() {
+<<<<<<< HEAD
     PIDController xController = new PIDController(Constants.kXControllerP, 0, 0);
     PIDController yController = new PIDController(Constants.kYControllerP, 0, 0);
     ProfiledPIDController thetaController = new ProfiledPIDController(Constants.kTControllerP, 0, 0, Constants.thetaControllerConstraints);
@@ -92,6 +111,8 @@ public class RobotContainer {
 
 
 
+=======
+>>>>>>> ece3efe34b1881c6816cc9caf72ed41e8e6c0858
     return new SequentialCommandGroup(
       new InstantCommand(() -> m_drivetrainSubsystem.resetGyroAngle(Rotation2d.fromDegrees(0)), m_drivetrainSubsystem),
 
