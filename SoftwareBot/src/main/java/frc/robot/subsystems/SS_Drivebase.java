@@ -21,7 +21,11 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.drivers.Pigeon;
+
 import static frc.robot.Constants.*;
 
 public class SS_Drivebase extends SubsystemBase {
@@ -61,7 +65,7 @@ public class SS_Drivebase extends SubsystemBase {
   public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND /
           Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
 
-  private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
+  /*private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
           // Front left
           new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
           // Front right
@@ -70,12 +74,14 @@ public class SS_Drivebase extends SubsystemBase {
           new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
           // Back right
           new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0)
-  );
+  );*/
 
   // By default we use a Pigeon for our gyroscope. But if you use another gyroscope, like a NavX, you can change this.
   // The important thing about how you configure your gyroscope is that rotating the robot counter-clockwise should
   // cause the angle reading to increase until it wraps back over to zero.
   private final PigeonIMU m_pigeon = new PigeonIMU(DRIVETRAIN_PIGEON_ID);
+
+  
   // FIXME Uncomment if you are using a NavX
 //  private final AHRS m_navx = new AHRS(SPI.Port.kMXP, (byte) 200); // NavX connected over MXP
 
@@ -90,12 +96,9 @@ public class SS_Drivebase extends SubsystemBase {
   private Object sensorLock = new Object();
   private static SS_Drivebase instance;
 
-  private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
-          new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
-          new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0),
-          new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
-          new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0));
+  private SwerveDriveKinematics kinematics;
 
+  
   private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(), new Pose2d());
 
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
@@ -103,8 +106,9 @@ public class SS_Drivebase extends SubsystemBase {
 
   private RamseteController controller = new RamseteController();
 
-  public SS_Drivebase() {
+  public SS_Drivebase(SwerveDriveKinematics kinematics) {
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
+    this.kinematics = kinematics;
 
     // There are 4 methods you can call to create your swerve modules.
     // The method you use depends on what motors you are using.
@@ -226,13 +230,42 @@ public class SS_Drivebase extends SubsystemBase {
     }
   public Pose2d getPose(){
           synchronized(kinematicsLock){
-                  return pose;
+                  return odometry.getPoseMeters();
           }
+  }
+
+  public SwerveDriveKinematics getKinematics(){
+          return kinematics;
+  }
+
+//   public void setDesiredState(SwerveModuleState state){
+//           state = SwerveModuleState.optimize(state, getState().angle)
+//   }
+
+  public void setModuleStates(SwerveModuleState[] desiredState){
+        m_frontLeftModule.set(desiredState[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+         desiredState[0].angle.getRadians());
+
+        m_frontRightModule.set(desiredState[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+         desiredState[1].angle.getRadians());
+
+        m_backLeftModule.set(desiredState[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+        desiredState[2].angle.getRadians());
+
+        m_backRightModule.set(desiredState[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+        desiredState[3].angle.getRadians());
+
+        // m_frontLeftModule.setDesiredState(desiredState[0]);
+        // m_frontRightModule.setDesiredState(desiredState[1]);
+        // m_backLeftModule.setDesiredState(desiredState[2]);
+        // m_backRightModule.setDesiredState(desiredState[3]);
   }
 
   @Override
   public void periodic() {
-    SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
+
+
+    SwerveModuleState[] states = kinematics.toSwerveModuleStates(m_chassisSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
 
 
@@ -240,6 +273,9 @@ public class SS_Drivebase extends SubsystemBase {
     m_frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians());
     m_backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
     m_backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());
+
+    SmartDashboard.putNumber("Robot Heading", m_pigeon.getFusedHeading());
+    SmartDashboard.putString("Robot Location", getPose().getTranslation().toString());
 
     odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
   }
