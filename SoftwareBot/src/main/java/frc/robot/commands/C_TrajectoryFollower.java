@@ -1,26 +1,12 @@
 package frc.robot.commands;
-/*
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d; */
-
-/*import org.frcteam2910.common.control.PidConstants;
-import org.frcteam2910.common.control.PidController;
-import org.frcteam2910.common.math.RigidTransform2;
-import org.frcteam2910.common.math.Vector2;
-import org.frcteam2910.common.util.HolonomicDriveSignal;*/
-
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.paths.ExampleTrajectory;
-import frc.robot.subsystems.SS_Drivebase;
+import frc.robot.subsystems.DrivetrainSubsystem;
 
 import java.util.ArrayList;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
@@ -30,7 +16,7 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 
 public class C_TrajectoryFollower extends CommandBase {
 
-  private SS_Drivebase drivebase;
+  private DrivetrainSubsystem drivebase;
 
   private Translation2d targetTranslation;
   private double targetRotation;
@@ -62,7 +48,7 @@ public class C_TrajectoryFollower extends CommandBase {
    * @param rotation angle to turn to in radians
    * @param rotationPercentOutput the maximum percent output for rotation */
    
-  public C_TrajectoryFollower(SS_Drivebase drivebase, Pose2d startPoint, double translationPercentOutput, double rotationPercentOutput, Pose2d endPoint, ArrayList<Translation2d> interiorWaypoints, TrajectoryConfig config) {
+  public C_TrajectoryFollower(DrivetrainSubsystem drivebase, Pose2d startPoint, double translationPercentOutput, double rotationPercentOutput, Pose2d endPoint, ArrayList<Translation2d> interiorWaypoints, TrajectoryConfig config) {
     this.drivebase = drivebase;
     addRequirements(drivebase);
     this.translationPercentOutput = translationPercentOutput;

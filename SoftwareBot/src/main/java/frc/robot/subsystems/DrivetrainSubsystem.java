@@ -103,11 +103,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   private RamseteController controller = new RamseteController();
 
-<<<<<<< HEAD:SoftwareBot/src/main/java/frc/robot/subsystems/SS_Drivebase.java
-  public SS_Drivebase(SwerveDriveKinematics kinematics) {
-=======
   public DrivetrainSubsystem() {
->>>>>>> ece3efe34b1881c6816cc9caf72ed41e8e6c0858:SoftwareBot/src/main/java/frc/robot/subsystems/DrivetrainSubsystem.java
     ShuffleboardTab tab = Shuffleboard.getTab("Drivetrain");
     this.kinematics = kinematics;
 
@@ -283,7 +279,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public static DrivetrainSubsystem getInstance() {
         if (instance == null) {
-            instance = new DrivetrainSubsystembsystem();
+            instance = new DrivetrainSubsystem();
         }
         return instance;
     }
