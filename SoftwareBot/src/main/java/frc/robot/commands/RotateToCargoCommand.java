@@ -7,8 +7,6 @@ import frc.robot.helpers.Pixy;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import io.github.pseudoresonance.pixy2api.Pixy2CCC.Block;
 
-import io.github.pseudoresonance.pixy2api.Pixy2CCC;
-
 // Rotate and drive to the closest cargo
 public class RotateToCargoCommand extends CommandBase {
   private DrivetrainSubsystem drivetrainSubsystem;
