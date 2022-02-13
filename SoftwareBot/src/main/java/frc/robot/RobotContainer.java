@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.paths.ExampleTrajectory;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 
@@ -64,22 +65,28 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public SequentialCommandGroup getAutonomousCommand() {
+
+    PIDController xController = new PIDController(1.5, 0, 0);
+    PIDController yController = new PIDController(1.5, 0, 0);
+    ProfiledPIDController thetaController = new ProfiledPIDController(3, 0, 0, Constants.thetaControllerConstraints);
+
+
+    ExampleTrajectory ex1 = new ExampleTrajectory();
     return new SequentialCommandGroup(
       new InstantCommand(() -> m_drivetrainSubsystem.resetGyroAngle(Rotation2d.fromDegrees(0)), m_drivetrainSubsystem),
 
       //new C_AutoDrive(m_drivetrainSubsystem, new Translation2d(2, 0), 1.0, Math.toRadians(180), 1.0),
 
       new SwerveControllerCommand(
-        ExampleTrajectory.getInstance().generateExampleTrajectory(),
+        ex1,
         m_drivetrainSubsystem::getPose,
         Constants.kinematics,
         xController,
         yController,
         thetaController,
         m_drivetrainSubsystem::setModuleStates,
-        m_drivetrainSubsystem),
+        m_drivetrainSubsystem)
 
-        new InstantCommand(() -> m_drivetrainSubsystem.stopModules())
 
       //TODO add requirements for C_AutoDrive in SequentialCommandGroup
       //check SS_DriveBase for todo on resetGyroAngle method

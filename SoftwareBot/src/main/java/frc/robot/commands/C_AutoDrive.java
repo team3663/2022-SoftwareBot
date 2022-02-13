@@ -88,7 +88,7 @@
 //     //rotationController.setInputRange(0, 2 * Math.PI);
 //     //combines the previous methods setInputRange and setContinuous
 
-//     //TODO find how to setPoint and inputRange using ramseteController
+//     //find how to setPoint and inputRange using ramseteController
 
   
 //     rotationController.enableContinuousInput(0, 2 * Math.PI);
