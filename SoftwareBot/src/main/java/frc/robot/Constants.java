@@ -1,6 +1,12 @@
 package frc.robot;
 
 public final class Constants {
+
+    // Port IDs for the XBox controllers we use
+    public static final int DRIVE_CONTROLLER_PORT = 0;
+    public static final int OPERATOR_CONTROLLER_PORT = 1;
+    public static final int TEST_CONTROLLER_PORT = 2;
+
     // left to right wheel, center to center
     public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.5461; // 21.5 inches
 
