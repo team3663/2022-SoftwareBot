@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
@@ -23,11 +24,13 @@ import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.paths.ExampleTrajectory;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
-
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
@@ -47,18 +50,16 @@ public class RobotContainer {
     // Left stick X axis -> left and right movement
     // Right stick X axis -> rotation
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
-            m_drivetrainSubsystem,
-            () -> -modifyAxis(m_controller.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(m_controller.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(m_controller.getRightX()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
-    ));
+        m_drivetrainSubsystem,
+        () -> -modifyAxis(m_controller.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        () -> -modifyAxis(m_controller.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        () -> -modifyAxis(m_controller.getRightX()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND));
   }
-  
 
   // Configure the button bindings
   void configureButtonBindings() {
   }
-  
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
@@ -69,30 +70,27 @@ public class RobotContainer {
     PIDController xController = new PIDController(1.5, 0, 0);
     PIDController yController = new PIDController(1.5, 0, 0);
     ProfiledPIDController thetaController = new ProfiledPIDController(3, 0, 0, Constants.thetaControllerConstraints);
-
-
     ExampleTrajectory ex1 = new ExampleTrajectory();
-    return new SequentialCommandGroup(
-      new InstantCommand(() -> m_drivetrainSubsystem.resetGyroAngle(Rotation2d.fromDegrees(0)), m_drivetrainSubsystem),
 
-      //new C_AutoDrive(m_drivetrainSubsystem, new Translation2d(2, 0), 1.0, Math.toRadians(180), 1.0),
+    SequentialCommandGroup autoCmd = new SequentialCommandGroup();
 
-      new SwerveControllerCommand(
-        ex1,
-        m_drivetrainSubsystem::getPose,
-        Constants.kinematics,
-        xController,
-        yController,
-        thetaController,
-        m_drivetrainSubsystem::setModuleStates,
-        m_drivetrainSubsystem)
+    Command cmd = new InstantCommand(() -> m_drivetrainSubsystem.resetGyroAngle(Rotation2d.fromDegrees(0)), m_drivetrainSubsystem);
+    autoCmd.addCommands(cmd);
 
+    cmd = new SwerveControllerCommand(
+      ex1,
+      m_drivetrainSubsystem::getPose,
+      Constants.kinematics,
+      xController,
+      yController,
+      thetaController,
+      m_drivetrainSubsystem::setModuleStates,
+      m_drivetrainSubsystem);
 
-      //TODO add requirements for C_AutoDrive in SequentialCommandGroup
-      //check SS_DriveBase for todo on resetGyroAngle method
-    );
+      autoCmd.addCommands(cmd);
+
+    return autoCmd;
   }
-
 
   private static double deadband(double value, double deadband) {
     if (Math.abs(value) > deadband) {
