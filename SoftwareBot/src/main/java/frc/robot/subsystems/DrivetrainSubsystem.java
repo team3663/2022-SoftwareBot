@@ -162,6 +162,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
                                 states[2].angle.getRadians());
                 backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
                                 states[3].angle.getRadians());
+
+
+                odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
+
         }
 
         @Override
@@ -170,8 +174,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);
                 SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
                 setModuleStates(states);
-
-                odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
 
                 driveSignalYEntry.setDouble(chassisSpeeds.vyMetersPerSecond);
                 driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond);
