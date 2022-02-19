@@ -9,7 +9,6 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Button;
@@ -58,17 +57,21 @@ public class RobotContainer {
 
   private void createCommands() {
 
-    TrajectoryConfig config = new TrajectoryConfig(Units.feetToMeters(2), Units.feetToMeters(2));
+    TrajectoryConfig config = new TrajectoryConfig(.25, .01);
     config.setReversed(true);
     
     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
-        new Pose2d(0, 0, new Rotation2d(0)),                        // Start at the origin facing the +X direction       
-        List.of(new Translation2d(1, 1), new Translation2d(2, -1)), // Pass through these two interior waypoints, making an 's' curve path
-        new Pose2d(3, 0, new Rotation2d(0)),                        // End 3 meters straight ahead of where we started, facing forward
+        new Pose2d(0, 0, new Rotation2d(90)),                        // Start at the origin facing the +X direction       
+        List.of(new Translation2d(1, 1), new Translation2d(2, 2)), // Pass through these two interior waypoints, making an 's' curve path
+        new Pose2d(3, 3, new Rotation2d(0)),                        // End 3 meters straight ahead of where we started, facing forward
         config);
+
+    double totalTimeSeconds = trajectory.getTotalTimeSeconds();
+    System.out.println("--------------------------------->" + totalTimeSeconds);
 
     PIDController xController = new PIDController(1.5, 0, 0);
     PIDController yController = new PIDController(1.5, 0, 0);
+
 
     double kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * 2 * Math.PI;
     double kMaxAngularSpeedRadiansPerSecond = kPhysicalMaxAngularSpeedRadiansPerSecond / 10;
