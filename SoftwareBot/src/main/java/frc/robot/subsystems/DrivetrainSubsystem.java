@@ -24,8 +24,8 @@ import static frc.robot.Constants.*;
 
 public class DrivetrainSubsystem extends SubsystemBase {
 
-        public static final double MAX_VOLTAGE = 12.0;
-        public static final double WHEEL_DIAMETER_METERS = 0.1016;
+        public static final double MAX_VOLTAGE = 5.0;
+        public static final double WHEEL_DIAMETER_METERS = 0.106325;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
                         SdsModuleConfigurations.MK4_L4.getDriveReduction() * WHEEL_DIAMETER_METERS * Math.PI;
@@ -43,10 +43,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
                         // Back right
                         new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0));
 
-        private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(),
+        private final Pigeon pigeon = new Pigeon(DRIVETRAIN_PIGEON_ID);
+        private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(kinematics, pigeon.getRotation2d(),
                         new Pose2d());
 
-        private final Pigeon pigeon = new Pigeon(DRIVETRAIN_PIGEON_ID);
         // counter-clockwise rotation increases angle
 
         private final SwerveModule frontLeftModule;
@@ -129,7 +129,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
         }
 
         public void resetPosition() {
-                odometry.resetPosition(new Pose2d(), new Rotation2d());
+                
+                odometry.resetPosition(new Pose2d(), pigeon.getRotation2d());
         }
 
         public Pose2d getPose() {
