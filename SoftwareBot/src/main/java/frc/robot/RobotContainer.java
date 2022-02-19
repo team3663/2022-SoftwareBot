@@ -67,7 +67,7 @@ public class RobotContainer {
         config);
 
     double totalTimeSeconds = trajectory.getTotalTimeSeconds();
-    System.out.println("--------------------------------->" + totalTimeSeconds);
+    System.out.println("-----------------------------> totalTimeSeconds: " + totalTimeSeconds);
 
     PIDController xController = new PIDController(1.5, 0, 0);
     PIDController yController = new PIDController(1.5, 0, 0);
