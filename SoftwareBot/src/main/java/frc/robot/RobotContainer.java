@@ -11,6 +11,8 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 
@@ -57,20 +59,21 @@ public class RobotContainer {
 
   private void createCommands() {
 
-    TrajectoryConfig config = new TrajectoryConfig(.25, .01);
+
+    TrajectoryConfig config = new TrajectoryConfig(.5, 1);
     config.setReversed(true);
     
     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
         new Pose2d(0, 0, new Rotation2d(90)),                        // Start at the origin facing the +X direction       
-        List.of(new Translation2d(1, 1), new Translation2d(2, 2)), // Pass through these two interior waypoints, making an 's' curve path
-        new Pose2d(3, 3, new Rotation2d(0)),                        // End 3 meters straight ahead of where we started, facing forward
+        List.of(new Translation2d(.5, .5), new Translation2d(1, 1)), // Pass through these two interior waypoints, making an 's' curve path
+        new Pose2d(2, 2, new Rotation2d(0)),                        // End 3 meters straight ahead of where we started, facing forward
         config);
 
     double totalTimeSeconds = trajectory.getTotalTimeSeconds();
     System.out.println("-----------------------------> totalTimeSeconds: " + totalTimeSeconds);
 
-    PIDController xController = new PIDController(1.5, 0, 0);
-    PIDController yController = new PIDController(1.5, 0, 0);
+    PIDController xController = new PIDController(.5, 0, 0);
+    PIDController yController = new PIDController(.5, 0, 0);
 
 
     double kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * 2 * Math.PI;
@@ -81,7 +84,7 @@ public class RobotContainer {
         kMaxAngularSpeedRadiansPerSecond,
         kMaxAngularAccelerationRadiansPerSecondSquared);
 
-    ProfiledPIDController thetaController = new ProfiledPIDController(3, 0, 0, thetaControllerConstraints);
+    ProfiledPIDController thetaController = new ProfiledPIDController(.02, 0, 0, thetaControllerConstraints);
 
     autoCommand = new SwerveControllerCommand(
       trajectory,
@@ -95,13 +98,12 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
-    new Button(driveController::getBackButton).whenPressed(drivetrainSubsystem::resetGyroscope);
-    new Button(driveController::getStartButton).whenPressed(drivetrainSubsystem::resetPosition);
+    new Button(driveController::getStartButton).whenPressed(drivetrainSubsystem::resetGyroscope);
   }
 
   public Command getAutonomousCommand() {
+    return new SequentialCommandGroup(new InstantCommand(() -> drivetrainSubsystem.resetGyroscope()), autoCommand);
 
-    return autoCommand;
   }
 
 

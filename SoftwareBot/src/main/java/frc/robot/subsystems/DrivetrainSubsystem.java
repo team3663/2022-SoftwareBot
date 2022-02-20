@@ -24,7 +24,7 @@ import static frc.robot.Constants.*;
 
 public class DrivetrainSubsystem extends SubsystemBase {
 
-        public static final double MAX_VOLTAGE = 5.0;
+        public static final double MAX_VOLTAGE = 6.0;
         public static final double WHEEL_DIAMETER_METERS = 0.106325;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
@@ -62,7 +62,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
         NetworkTableEntry driveSignalXEntry;
         NetworkTableEntry driveSignalYEntry;
         NetworkTableEntry driveSignalRotationEntry;
-
+        NetworkTableEntry pigeonCompassHeadingEntry;
+        NetworkTableEntry odometryCompassHeadingEntry;
         public DrivetrainSubsystem() {
                 ShuffleboardTab drivetrainModuletab = Shuffleboard.getTab("drivetrain_modules");
 
@@ -119,6 +120,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
                                 .withPosition(0, 2)
                                 .withSize(1, 1)
                                 .getEntry();
+                pigeonCompassHeadingEntry = drivetrainRobotTab.add("Pigeon heading", 0.0)
+                                .withPosition(1, 0)
+                                .withSize(1,1)
+                                .getEntry();
+                odometryCompassHeadingEntry = drivetrainRobotTab.add("Odometry heading", 0.0)
+                                .withPosition(1,1)
+                                .withSize(1, 1)
+                                .getEntry();
                 ShuffleboardLayout driveSignalContainer = drivetrainRobotTab
                                 .getLayout("Drive Signal", BuiltInLayouts.kGrid)
                                 .withPosition(0, 3)
@@ -165,7 +174,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
                                 states[3].angle.getRadians());
 
 
-                odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
+               /*  updates odometry over time via timeStamp */
+               odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
+               
+
+
+               //THIS CHANGED ---^ ORIGINAL----^
+               //odometry.update(pigeon.getRotation2d(), states);
+
 
         }
 
@@ -183,5 +199,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 poseXEntry.setDouble(getPose().getTranslation().getX());
                 poseYEntry.setDouble(getPose().getTranslation().getY());
                 poseAngleEntry.setDouble(getPose().getRotation().getDegrees());
+
+                pigeonCompassHeadingEntry.setDouble(pigeon.getAngle());
+                odometryCompassHeadingEntry.setDouble(odometry.getPoseMeters().getRotation().getDegrees());
         }
 }
