@@ -10,11 +10,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 
 public class AutonomousDriveCommand extends CommandBase {
-  //private Vector2 targetTranslation;
-  private Translation2d targetTranslation;
-  private Rotation2d targetRotation;
 
-  // TODO tune pid
   private PIDController translationXController = new PIDController(0.6, 0, 0); //10
   private PIDController translationYController = new PIDController(0, 0, 0);
   private PIDController rotationController = new PIDController(0, 0, 0);
@@ -34,9 +30,6 @@ public class AutonomousDriveCommand extends CommandBase {
       this.drivetrainSubsystem = drivetrainSubsystem;
       addRequirements(drivetrainSubsystem);
       
-      this.targetTranslation = targetTranslation;
-      this.targetRotation = targetRotation;
-      
       translationXController.setSetpoint(targetTranslation.getX()); 
       translationYController.setSetpoint(targetTranslation.getY());
 
@@ -49,6 +42,7 @@ public class AutonomousDriveCommand extends CommandBase {
     drivetrainSubsystem.resetPosition();
   }
 
+  // TODO see if I can get rid of the cap method
   @Override
   public void execute() {
     currentPose = drivetrainSubsystem.getPose();
@@ -64,7 +58,7 @@ public class AutonomousDriveCommand extends CommandBase {
   }
 
   private double cap(double value) {
-    return Math.max(-2, Math.min(value, 2));
+    return Math.max(-1, Math.min(value, 1));
   }
 
   @Override
