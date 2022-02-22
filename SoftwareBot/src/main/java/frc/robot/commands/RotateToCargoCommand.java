@@ -7,16 +7,11 @@ import frc.robot.helpers.Pixy;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import io.github.pseudoresonance.pixy2api.Pixy2CCC.Block;
 
-// Rotate and drive to the closest cargo
-
-// from responding to not responding without changing code, shuffleboard says cannot see the ball
-    // bad connection between pixy and roborio? see if the led is turned on
-    // try changing p and percentoutput?
 public class RotateToCargoCommand extends CommandBase {
   private DrivetrainSubsystem drivetrainSubsystem;
   private static Pixy pixy;
   private PIDController translationXPidController = new PIDController(0.001, 0, 0); // tune
-  private PIDController rotationPidController = new PIDController(0.025, 0, 0); // acceptable, but needs fine tune
+  private PIDController rotationPidController = new PIDController(0.025, 0, 0); // tune
 
   private static Block largestBlock = null;
   private double lastXOffset = 0;
