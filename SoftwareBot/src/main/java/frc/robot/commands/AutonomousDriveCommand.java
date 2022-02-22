@@ -10,11 +10,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 
 public class AutonomousDriveCommand extends CommandBase {
-  //private Vector2 targetTranslation;
-  private Translation2d targetTranslation;
-  private Rotation2d targetRotation;
 
-  // TODO tune pid
   private PIDController translationXController = new PIDController(0.6, 0, 0); //10
   private PIDController translationYController = new PIDController(0, 0, 0);
   private PIDController rotationController = new PIDController(0, 0, 0);
@@ -33,9 +29,6 @@ public class AutonomousDriveCommand extends CommandBase {
   public AutonomousDriveCommand(DrivetrainSubsystem drivetrainSubsystem, Translation2d targetTranslation, Rotation2d targetRotation) {
       this.drivetrainSubsystem = drivetrainSubsystem;
       addRequirements(drivetrainSubsystem);
-      
-      this.targetTranslation = targetTranslation;
-      this.targetRotation = targetRotation;
       
       translationXController.setSetpoint(targetTranslation.getX()); 
       translationYController.setSetpoint(targetTranslation.getY());
