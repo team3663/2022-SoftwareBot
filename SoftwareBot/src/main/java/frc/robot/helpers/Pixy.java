@@ -18,7 +18,7 @@ public class Pixy {
     public final static int TEAM_BLUE = 2;
     private int teamColor;
 
-    private int maxBlocks = 25;
+    private int maxBlocks = 10;
 
     public Pixy(int teamColor) {
         this.teamColor = teamColor;
@@ -45,8 +45,10 @@ public class Pixy {
         for (Block block : blocks) {
             if (largestBlock == null) {
                 largestBlock = block;
-            } else if (getArea(block) > getArea(block)) {
-                largestBlock = block;
+            } else if (getArea(block) > getArea(largestBlock)) {
+                if (getArea(block) > 100 && getArea(block) < 2500){
+                    largestBlock = block;
+                }
             }
         }
         return largestBlock;

@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import com.swervedrivespecialties.swervelib.Mk3SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
@@ -19,6 +18,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.commands.RotateToCargoCommand;
 import frc.robot.helpers.Pigeon;
 
 import static frc.robot.Constants.*;
@@ -60,6 +60,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
   NetworkTableEntry poseXEntry;
   NetworkTableEntry poseYEntry;
   NetworkTableEntry poseAngleEntry;
+  NetworkTableEntry ballAreaEntry;
+  NetworkTableEntry ballXEntry;
+  NetworkTableEntry ballYEntry;
   NetworkTableEntry driveSignalXEntry;
   NetworkTableEntry driveSignalYEntry;
   NetworkTableEntry driveSignalRotationEntry;
@@ -124,6 +127,18 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
                 .withPosition(0, 2)
                 .withSize(1, 1)
                 .getEntry();
+        ballAreaEntry = drivetrainRobotTab.add("Ball Area", 0.0)
+                .withPosition(1, 0)
+                .withSize(1, 1)
+                .getEntry();
+        ballXEntry = drivetrainRobotTab.add("Ball X", 0.0)
+                .withPosition(1, 1)
+                .withSize(1, 1)
+                .getEntry();
+        ballYEntry = drivetrainRobotTab.add("Ball Y", 0.0)
+                .withPosition(1, 2)
+                .withSize(1, 1)
+                .getEntry();
         ShuffleboardLayout driveSignalContainer = drivetrainRobotTab.getLayout("Drive Signal", BuiltInLayouts.kGrid)
                         .withPosition(0, 3)
                         .withSize(3, 1);
@@ -168,6 +183,10 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
     driveSignalYEntry.setDouble(chassisSpeeds.vyMetersPerSecond);
     driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond);
     driveSignalRotationEntry.setDouble(chassisSpeeds.omegaRadiansPerSecond);
+
+    ballAreaEntry.setDouble(RotateToCargoCommand.getBallArea());
+    ballXEntry.setDouble(RotateToCargoCommand.getX());
+    ballYEntry.setDouble(RotateToCargoCommand.getY());
 
     poseXEntry.setDouble(getPose().getTranslation().getX());
     poseYEntry.setDouble(getPose().getTranslation().getY());
