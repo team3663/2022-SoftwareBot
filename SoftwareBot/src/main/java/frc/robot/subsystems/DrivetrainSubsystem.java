@@ -18,7 +18,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.commands.RotateToCargoCommand;
+import frc.robot.commands.AutonomousFollowCargoCommand;
 import frc.robot.helpers.Pigeon;
 
 import static frc.robot.Constants.*;
@@ -184,9 +184,9 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
     driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond);
     driveSignalRotationEntry.setDouble(chassisSpeeds.omegaRadiansPerSecond);
 
-    ballAreaEntry.setDouble(RotateToCargoCommand.getBallArea());
-    ballXEntry.setDouble(RotateToCargoCommand.getX());
-    ballYEntry.setDouble(RotateToCargoCommand.getY());
+    ballAreaEntry.setDouble(AutonomousFollowCargoCommand.getBallArea());
+    ballXEntry.setDouble(AutonomousFollowCargoCommand.getX());
+    ballYEntry.setDouble(AutonomousFollowCargoCommand.getY());
 
     poseXEntry.setDouble(getPose().getTranslation().getX());
     poseYEntry.setDouble(getPose().getTranslation().getY());
