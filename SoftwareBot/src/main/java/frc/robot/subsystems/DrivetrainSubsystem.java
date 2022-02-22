@@ -24,7 +24,7 @@ import static frc.robot.Constants.*;
 
 public class DrivetrainSubsystem extends SubsystemBase {
 
-        public static final double MAX_VOLTAGE = 6.0;
+        public static final double MAX_VOLTAGE = 12.0;
         public static final double WHEEL_DIAMETER_METERS = 0.106325;
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
@@ -121,11 +121,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
                                 .withSize(1, 1)
                                 .getEntry();
                 pigeonCompassHeadingEntry = drivetrainRobotTab.add("Pigeon heading", 0.0)
-                                .withPosition(1, 0)
+                                .withPosition(2, 0)
                                 .withSize(1,1)
                                 .getEntry();
                 odometryCompassHeadingEntry = drivetrainRobotTab.add("Odometry heading", 0.0)
-                                .withPosition(1,1)
+                                .withPosition(2,1)
                                 .withSize(1, 1)
                                 .getEntry();
                 ShuffleboardLayout driveSignalContainer = drivetrainRobotTab
@@ -175,12 +175,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
 
                /*  updates odometry over time via timeStamp */
-               odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
+               //odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
                
 
 
                //THIS CHANGED ---^ ORIGINAL----^
-               //odometry.update(pigeon.getRotation2d(), states);
+               odometry.update(pigeon.getRotation2d(), states);
 
 
         }

@@ -60,20 +60,20 @@ public class RobotContainer {
   private void createCommands() {
 
 
-    TrajectoryConfig config = new TrajectoryConfig(.5, 1);
+    TrajectoryConfig config = new TrajectoryConfig(.75, 1);
     config.setReversed(true);
     
     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
         new Pose2d(0, 0, new Rotation2d(90)),                        // Start at the origin facing the +X direction       
-        List.of(new Translation2d(.5, .5), new Translation2d(1, 1)), // Pass through these two interior waypoints, making an 's' curve path
-        new Pose2d(2, 2, new Rotation2d(0)),                        // End 3 meters straight ahead of where we started, facing forward
+        List.of(new Translation2d(2, 2)), // Pass through these two interior waypoints, making an 's' curve path
+        new Pose2d(2, -2, new Rotation2d(0)),                        // End 3 meters straight ahead of where we started, facing forward
         config);
 
     double totalTimeSeconds = trajectory.getTotalTimeSeconds();
     System.out.println("-----------------------------> totalTimeSeconds: " + totalTimeSeconds);
 
-    PIDController xController = new PIDController(.5, 0, 0);
-    PIDController yController = new PIDController(.5, 0, 0);
+    PIDController xController = new PIDController(.4625, 0, 0); 
+    PIDController yController = new PIDController(.4625, 0, 0); 
 
 
     double kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * 2 * Math.PI;
@@ -84,7 +84,7 @@ public class RobotContainer {
         kMaxAngularSpeedRadiansPerSecond,
         kMaxAngularAccelerationRadiansPerSecondSquared);
 
-    ProfiledPIDController thetaController = new ProfiledPIDController(.02, 0, 0, thetaControllerConstraints);
+    ProfiledPIDController thetaController = new ProfiledPIDController(.04, 0, 0, thetaControllerConstraints); // .04
 
     autoCommand = new SwerveControllerCommand(
       trajectory,
