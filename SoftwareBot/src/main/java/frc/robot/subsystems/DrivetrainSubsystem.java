@@ -53,6 +53,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
         private final SwerveModule frontRightModule;
         private final SwerveModule backLeftModule;
         private final SwerveModule backRightModule;
+        private Pose2d robotPosition;
 
         private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
@@ -64,6 +65,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
         NetworkTableEntry driveSignalRotationEntry;
         NetworkTableEntry pigeonCompassHeadingEntry;
         NetworkTableEntry odometryCompassHeadingEntry;
+        
+        NetworkTableEntry xEntry;
+        NetworkTableEntry yEntry;
         public DrivetrainSubsystem() {
                 ShuffleboardTab drivetrainModuletab = Shuffleboard.getTab("drivetrain_modules");
 
@@ -128,6 +132,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
                                 .withPosition(2,1)
                                 .withSize(1, 1)
                                 .getEntry();
+                xEntry = drivetrainRobotTab.add("X Entry", 0.0)
+                                .withPosition(3, 0)
+                                .withSize(1, 1)
+                                .getEntry();
+                yEntry = drivetrainRobotTab.add("Y Entry", 0.0)
+                                .withPosition(3, 1)
+                                .withSize(1, 1)
+                                .getEntry();
                 ShuffleboardLayout driveSignalContainer = drivetrainRobotTab
                                 .getLayout("Drive Signal", BuiltInLayouts.kGrid)
                                 .withPosition(0, 3)
@@ -136,14 +148,17 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 driveSignalXEntry = driveSignalContainer.add("Drive Signal Forward", 0.0).getEntry();
                 driveSignalRotationEntry = driveSignalContainer.add("Drive Signal Rotation", 0.0).getEntry();
         }
+        public void calibratePigeon(){
+                pigeon.calibrate();
+        }
 
         public void resetPosition() {
                 
-                odometry.resetPosition(new Pose2d(), pigeon.getRotation2d());
+                odometry.resetPosition(new Pose2d(), new Rotation2d(0));
         }
 
         public Pose2d getPose() {
-                return odometry.getPoseMeters();
+                return robotPosition;
         }
 
         public SwerveDriveKinematics getKinematics() {
@@ -180,7 +195,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
 
                //THIS CHANGED ---^ ORIGINAL----^
-               odometry.update(pigeon.getRotation2d(), states);
+               robotPosition = odometry.update(pigeon.getRotation2d(), states);
+               System.out.println("updated ");
 
 
         }
@@ -199,6 +215,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 poseXEntry.setDouble(getPose().getTranslation().getX());
                 poseYEntry.setDouble(getPose().getTranslation().getY());
                 poseAngleEntry.setDouble(getPose().getRotation().getDegrees());
+
+                xEntry.setDouble(getPose().getX());
+                yEntry.setDouble(getPose().getY());
 
                 pigeonCompassHeadingEntry.setDouble(pigeon.getAngle());
                 odometryCompassHeadingEntry.setDouble(odometry.getPoseMeters().getRotation().getDegrees());
