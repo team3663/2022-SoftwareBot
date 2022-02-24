@@ -64,8 +64,8 @@ public class RobotContainer {
     
     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
         new Pose2d(0, 0, new Rotation2d(90)),                        // Start at the origin facing the +X direction       
-        List.of(new Translation2d(2, 2)), // Pass through these two interior waypoints, making an 's' curve path
-        new Pose2d(4, 0, new Rotation2d(0)),                        // End 3 meters straight ahead of where we started, facing forward
+        List.of(new Translation2d(2, 0),new Translation2d(2, 2)), // Pass through these two interior waypoints, making an 's' curve path
+        new Pose2d(4, 2, new Rotation2d(0)),                        // End 3 meters straight ahead of where we started, facing forward
         config);
 
     double totalTimeSeconds = trajectory.getTotalTimeSeconds();
