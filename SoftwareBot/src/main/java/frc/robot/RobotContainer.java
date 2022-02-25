@@ -50,10 +50,13 @@ public class RobotContainer {
     drivetrainSubsystem = new DrivetrainSubsystem();
     drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
         drivetrainSubsystem,
-        () -> -modifyAxis(driveController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-        () -> -modifyAxis(driveController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-        () -> -modifyAxis(driveController.getRightX()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND));    
+        // () -> -cubeRoot(driveController.getLeftY()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        // () -> -cubeRoot(driveController.getLeftX()) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        // () -> -cubeRoot(driveController.getRightX()) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND));    
 
+        () -> -deadband(driveController.getLeftY(), 0.05) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        () -> -deadband(driveController.getLeftX(), 0.05) * DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
+        () -> -deadband(driveController.getRightX(), 0.05) * DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND));    
   }
 
   private void createCommands() {
@@ -63,7 +66,7 @@ public class RobotContainer {
     config.setReversed(true);
     
     Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
-        new Pose2d(0, 0, new Rotation2d(90)),                        // Start at the origin facing the +X direction       
+        new Pose2d(0, 0, new Rotation2d(0)),                        // Start at the origin facing the +X direction       
         List.of(new Translation2d(2, 0),new Translation2d(2, 2)), // Pass through these two interior waypoints, making an 's' curve path
         new Pose2d(4, 2, new Rotation2d(0)),                        // End 3 meters straight ahead of where we started, facing forward
         config);
@@ -71,8 +74,14 @@ public class RobotContainer {
     double totalTimeSeconds = trajectory.getTotalTimeSeconds();
     System.out.println("-----------------------------> totalTimeSeconds: " + totalTimeSeconds);
 
-    PIDController xController = new PIDController(.0000000001, 0, 0); //.01 for both
-    PIDController yController = new PIDController(.0000000001, 0, 0); 
+    double kpX = 0.0000000001;  //.01 for both X and Y
+    double kpY = 0.0000000001;
+    double kiX = 0.0;
+    double kiY = 0.0;
+    double kdX = 0.0;
+    double kdY = 0.0;
+    PIDController xController = new PIDController(kpX, kiX, kdX); 
+    PIDController yController = new PIDController(kpY, kiY, kdY); 
 
 
     double kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * 2 * Math.PI;
@@ -83,7 +92,10 @@ public class RobotContainer {
         kMaxAngularSpeedRadiansPerSecond,
         kMaxAngularAccelerationRadiansPerSecondSquared);
 
-    ProfiledPIDController thetaController = new ProfiledPIDController(.1, 0, 0, thetaControllerConstraints); //.04
+    double kpTheta = 0.04;   // .04
+    double kiTheta = 0.0;
+    double kdTheta = 0.0;
+    ProfiledPIDController thetaController = new ProfiledPIDController(kpTheta, kiTheta, kdTheta, thetaControllerConstraints); 
 
     autoCommand = new SwerveControllerCommand(
       trajectory,
@@ -105,23 +117,22 @@ public class RobotContainer {
 
   }
 
-
   private static double deadband(double value, double deadband) {
-    if (Math.abs(value) > deadband) {
-      if (value > 0.1) {
-        return (value - deadband) / (1.0 - deadband);
-      } else {
-        return (value + deadband) / (1.0 - deadband);
-      }
-    } else {
-      return 0.0;
+    if (Math.abs(value) < deadband) {
+      value = 0.0;
     }
+    return value;
   }
 
-  private static double modifyAxis(double value) {
-    value = deadband(value, 0.1);
-    value = Math.copySign(value * value, value);
+  private static double cubeRoot(double value, double deadband) {
+    value = deadband(value, deadband);
+    value = Math.copySign(Math.cbrt(value), value);
+    return value;
+  }
 
+  private static double squared(double value, double deadband) {
+    value = deadband(value, deadband);
+    value = Math.copySign(value * value, value);
     return value;
   }
 }

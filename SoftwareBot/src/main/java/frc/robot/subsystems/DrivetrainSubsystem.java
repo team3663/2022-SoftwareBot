@@ -11,13 +11,15 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.wpilibj.Timer;
+
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+// import frc.robot.helpers.Pigeon;
 import frc.robot.helpers.Pigeon;
 
 import static frc.robot.Constants.*;
@@ -25,7 +27,7 @@ import static frc.robot.Constants.*;
 public class DrivetrainSubsystem extends SubsystemBase {
 
         public static final double MAX_VOLTAGE = 12.0;
-        public static final double WHEEL_DIAMETER_METERS = 0.106325;
+        public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(4.1875); // 4-3/16 inch = 0.1063625 meters    
 
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
                         SdsModuleConfigurations.MK4_L4.getDriveReduction() * WHEEL_DIAMETER_METERS * Math.PI;
@@ -44,6 +46,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                         new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0));
 
         private final Pigeon pigeon = new Pigeon(DRIVETRAIN_PIGEON_ID);
+        
         private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(kinematics, pigeon.getRotation2d(),
                         new Pose2d());
 
@@ -112,33 +115,33 @@ public class DrivetrainSubsystem extends SubsystemBase {
                                 BACK_RIGHT_MODULE_STEER_OFFSET);
 
                 ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
-                poseXEntry = drivetrainRobotTab.add("Pose X", 0.0)
+                poseXEntry = drivetrainRobotTab.add("Pose X (meters)", 0.0)
                                 .withPosition(0, 0)
-                                .withSize(1, 1)
+                                .withSize(2, 1)
                                 .getEntry();
-                poseYEntry = drivetrainRobotTab.add("Pose Y", 0.0)
+                poseYEntry = drivetrainRobotTab.add("Pose Y (meters)", 0.0)
                                 .withPosition(0, 1)
-                                .withSize(1, 1)
+                                .withSize(2, 1)
                                 .getEntry();
-                poseAngleEntry = drivetrainRobotTab.add("Pose Angle", 0.0)
+                poseAngleEntry = drivetrainRobotTab.add("Pose Angle (degrees)", 0.0)
                                 .withPosition(0, 2)
-                                .withSize(1, 1)
+                                .withSize(2, 1)
                                 .getEntry();
-                pigeonCompassHeadingEntry = drivetrainRobotTab.add("Pigeon heading", 0.0)
+                pigeonCompassHeadingEntry = drivetrainRobotTab.add("Pigeon heading (degrees)", 0.0)
                                 .withPosition(2, 0)
-                                .withSize(1,1)
+                                .withSize(3, 1)
                                 .getEntry();
-                odometryCompassHeadingEntry = drivetrainRobotTab.add("Odometry heading", 0.0)
-                                .withPosition(2,1)
-                                .withSize(1, 1)
+                odometryCompassHeadingEntry = drivetrainRobotTab.add("Odometry heading (degrees)", 0.0)
+                                .withPosition(2, 1)
+                                .withSize(3, 1)
                                 .getEntry();
-                xEntry = drivetrainRobotTab.add("X Entry", 0.0)
-                                .withPosition(3, 0)
-                                .withSize(1, 1)
+                xEntry = drivetrainRobotTab.add("X Entry (meters)", 0.0)
+                                .withPosition(5, 0)
+                                .withSize(2, 1)
                                 .getEntry();
-                yEntry = drivetrainRobotTab.add("Y Entry", 0.0)
-                                .withPosition(3, 1)
-                                .withSize(1, 1)
+                yEntry = drivetrainRobotTab.add("Y Entry (meters)", 0.0)
+                                .withPosition(5, 1)
+                                .withSize(2, 1)
                                 .getEntry();
                 ShuffleboardLayout driveSignalContainer = drivetrainRobotTab
                                 .getLayout("Drive Signal", BuiltInLayouts.kGrid)
@@ -147,16 +150,27 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 driveSignalYEntry = driveSignalContainer.add("Drive Signal Strafe", 0.0).getEntry();
                 driveSignalXEntry = driveSignalContainer.add("Drive Signal Forward", 0.0).getEntry();
                 driveSignalRotationEntry = driveSignalContainer.add("Drive Signal Rotation", 0.0).getEntry();
+
+                // reset gyroscope
+                resetGyroscope();
+                
         }
+
         public void calibratePigeon(){
                 pigeon.calibrate();
         }
 
+        /**
+         * reset robot position to (0, 0, 0)
+         */
         public void resetPosition() {
-                
                 odometry.resetPosition(new Pose2d(), new Rotation2d(0));
         }
 
+        /**
+         * get current pose of the robot
+         * @return
+         */
         public Pose2d getPose() {
                 return robotPosition;
         }
@@ -165,6 +179,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 return kinematics;
         }
 
+        /**
+         * reset gyro to heading of 0
+         */
         public void resetGyroscope() {
                 pigeon.reset();
         }
@@ -196,7 +213,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
                //THIS CHANGED ---^ ORIGINAL----^
                robotPosition = odometry.update(pigeon.getRotation2d(), states);
-               System.out.println("updated ");
+              //  System.out.println("updated ");
 
 
         }

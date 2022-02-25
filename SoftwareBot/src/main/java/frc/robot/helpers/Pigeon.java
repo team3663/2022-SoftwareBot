@@ -44,8 +44,7 @@ public class Pigeon implements Gyro, Accelerometer {
     // get gyro
     @Override
     public double getAngle() {
-        angle = pigeon.getFusedHeading();
-        return angle;
+        return pigeon.getFusedHeading();
     }
 
     // reset gyro
