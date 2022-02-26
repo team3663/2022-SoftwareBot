@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 
-public class AutonomousDriveCommand extends CommandBase {
+public class AutoDriveCommand extends CommandBase {
 
   private PIDController translationXController = new PIDController(0.6, 0, 0); //10
   private PIDController translationYController = new PIDController(0, 0, 0);
@@ -26,7 +26,7 @@ public class AutonomousDriveCommand extends CommandBase {
 
   private DrivetrainSubsystem drivetrainSubsystem;
 
-  public AutonomousDriveCommand(DrivetrainSubsystem drivetrainSubsystem, Translation2d targetTranslation, Rotation2d targetRotation) {
+  public AutoDriveCommand(DrivetrainSubsystem drivetrainSubsystem, Translation2d targetTranslation, Rotation2d targetRotation) {
       this.drivetrainSubsystem = drivetrainSubsystem;
       addRequirements(drivetrainSubsystem);
       
@@ -39,7 +39,8 @@ public class AutonomousDriveCommand extends CommandBase {
 
   @Override
   public void initialize(){
-    drivetrainSubsystem.resetPosition();
+    drivetrainSubsystem.resetPose();
+    drivetrainSubsystem.resetGyroscope();
   }
 
   // TODO see if I can get rid of the cap method

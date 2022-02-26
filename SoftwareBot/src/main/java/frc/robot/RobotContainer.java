@@ -1,21 +1,27 @@
 package frc.robot;
 
+import java.util.List;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Button;
-import frc.robot.commands.AutonomousDriveCommand;
-import frc.robot.commands.AutonomousFollowCargoCommand;
+import frc.robot.commands.AutoFollowCargoCommand;
+import frc.robot.commands.AutoTrajectoryFollowingCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.helpers.Pixy;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 // declare subsystems, commands, and button mappings
 public class RobotContainer {
-
-  private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem();
-  private final XboxController controller = new XboxController(0);
-
+  
   private final Pixy pixy = new Pixy(Pixy.TEAM_RED);
+
+  private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(pixy);
+  private final XboxController controller = new XboxController(0);
 
   public RobotContainer() {
     drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
@@ -32,13 +38,19 @@ public class RobotContainer {
 
   private void configureButtonBindings() {
     new Button(controller::getBackButton).whenPressed(drivetrainSubsystem::resetGyroscope);
-    new Button(controller::getStartButton).whenPressed(drivetrainSubsystem::resetPosition);
+    new Button(controller::getStartButton).whenPressed(drivetrainSubsystem::resetPose);
   }
 
-  public Command getAutonomousCommand() {
-    // return new AutonomousDriveCommand(drivetrainSubsystem, new Translation2d(-2, 0), new Rotation2d());
-    return new AutonomousFollowCargoCommand(drivetrainSubsystem, pixy);
-  }
+  public SequentialCommandGroup getAutonomousCommand() {
+    Command followCargo = new AutoFollowCargoCommand(drivetrainSubsystem, pixy);
+
+    Pose2d start = new Pose2d(0, 0, new Rotation2d(0));
+    List<Translation2d> waypoints = List.of(new Translation2d(2, 0), new Translation2d(2, 2));
+    Pose2d end = new Pose2d(4, 2, new Rotation2d(0));
+    Command followTrajectory = new AutoTrajectoryFollowingCommand(drivetrainSubsystem, start, waypoints, end);
+    
+    return new SequentialCommandGroup(followTrajectory, followCargo);
+}
 
   private static double deadband(double value, double deadband) {
     if (Math.abs(value) > deadband) {

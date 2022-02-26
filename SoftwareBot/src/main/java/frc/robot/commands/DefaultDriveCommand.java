@@ -27,7 +27,8 @@ public class DefaultDriveCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        drivetrainSubsystem.resetPosition();
+        drivetrainSubsystem.resetPose();
+        drivetrainSubsystem.resetGyroscope();
     }
 
     @Override

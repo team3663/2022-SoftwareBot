@@ -7,7 +7,7 @@ import frc.robot.helpers.Pixy;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import io.github.pseudoresonance.pixy2api.Pixy2CCC.Block;
 
-public class AutonomousFollowCargoCommand extends CommandBase {
+public class AutoFollowCargoCommand extends CommandBase {
   private DrivetrainSubsystem drivetrainSubsystem;
   private Pixy pixy;
   private PIDController translationXPidController = new PIDController(0.001, 0, 0); // tune
@@ -15,7 +15,7 @@ public class AutonomousFollowCargoCommand extends CommandBase {
   
   private double lastXOffset = 0;
 
-  public AutonomousFollowCargoCommand(DrivetrainSubsystem drivetrainSubsystem, Pixy pixy) {
+  public AutoFollowCargoCommand(DrivetrainSubsystem drivetrainSubsystem, Pixy pixy) {
 
     this.drivetrainSubsystem = drivetrainSubsystem;
     addRequirements(drivetrainSubsystem);
@@ -28,7 +28,8 @@ public class AutonomousFollowCargoCommand extends CommandBase {
 
   @Override
   public void initialize() {
-    drivetrainSubsystem.resetPosition();
+    drivetrainSubsystem.resetPose();
+    drivetrainSubsystem.resetGyroscope();
     pixy.turnOnLights();
   }
 

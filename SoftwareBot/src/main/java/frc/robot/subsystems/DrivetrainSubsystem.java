@@ -11,6 +11,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
@@ -18,12 +21,13 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.commands.AutonomousFollowCargoCommand;
 import frc.robot.helpers.Pigeon;
 import frc.robot.helpers.Pixy;
 import io.github.pseudoresonance.pixy2api.Pixy2CCC.Block;
 
 import static frc.robot.Constants.*;
+
+import java.util.List;
 
 public class DrivetrainSubsystem extends SubsystemBase {
 
@@ -35,6 +39,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND /
           Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
+          
+  public static final double TRAJECTORY_MAX_VELOCITY = 1.5; // meters per second
+  public static final double TRAJECTORY_MAX_ACCELERATION = 1;
 
   private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
           // Front left
@@ -69,9 +76,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private NetworkTableEntry driveSignalRotationEntry;
 
   private Pixy pixy;
-  private Block cargo;
 
-  public DrivetrainSubsystem() {
+  public DrivetrainSubsystem(Pixy pixy) {
     ShuffleboardTab drivetrainModuletab = Shuffleboard.getTab("drivetrain_modules");
 
     frontLeftModule = Mk4SwerveModuleHelper.createFalcon500(
@@ -145,10 +151,16 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
                 driveSignalYEntry = driveSignalContainer.add("Drive Signal Strafe", 0.0).getEntry();
                 driveSignalXEntry = driveSignalContainer.add("Drive Signal Forward", 0.0).getEntry();
                 driveSignalRotationEntry = driveSignalContainer.add("Drive Signal Rotation", 0.0).getEntry();
+
+        this.pixy = pixy;
   }
 
-  public void resetPosition() {
-          odometry.resetPosition(new Pose2d(), new Rotation2d());
+  public SwerveDriveKinematics getKinematics() {
+          return kinematics;
+  }
+
+  public void resetPose() {
+          odometry.resetPosition(new Pose2d(), getGyroscopeRotation());
   }
 
   public Pose2d getPose() {
@@ -160,52 +172,46 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
   }
 
   public Rotation2d getGyroscopeRotation() {
-    return Rotation2d.fromDegrees(pigeon.getAngle());
+          return Rotation2d.fromDegrees(pigeon.getAngle());
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
           this.chassisSpeeds = chassisSpeeds;
   }
 
-  public void updateCargo(){
-        cargo = pixy.getLargestBlock();
+  public Trajectory getTrajectory(Pose2d start, List<Translation2d> waypoints, Pose2d end) {
+        TrajectoryConfig config = new TrajectoryConfig(1.5, 1); // meters per second
+        config.setReversed(true);
+
+        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(start, waypoints, end, config);
+
+        return trajectory;
   }
 
-  public Block getCargo() {
-          return cargo;
-  }
-
-  public double getCargoArea() {
-          return pixy.getArea(cargo);
-  }
-
-  public double getCargoXOffset() {
-          return pixy.getX(cargo);
+  public void setModules(SwerveModuleState[] states) {
+        frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[0].angle.getRadians());
+        frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians());
+        backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
+        backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());  
   }
 
 @Override
   public void periodic() {
+        SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
+        setModules(states);
+        odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
 
-    SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
+        driveSignalYEntry.setDouble(chassisSpeeds.vyMetersPerSecond);
+        driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond);
+        driveSignalRotationEntry.setDouble(chassisSpeeds.omegaRadiansPerSecond);
 
-    frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[0].angle.getRadians());
-    frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians());
-    backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
-    backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());
-    
-    odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
+        poseXEntry.setDouble(getPose().getTranslation().getX());
+        poseYEntry.setDouble(getPose().getTranslation().getY());
+        poseAngleEntry.setDouble(getPose().getRotation().getDegrees());
 
-    driveSignalYEntry.setDouble(chassisSpeeds.vyMetersPerSecond);
-    driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond);
-    driveSignalRotationEntry.setDouble(chassisSpeeds.omegaRadiansPerSecond);
-
-    poseXEntry.setDouble(getPose().getTranslation().getX());
-    poseYEntry.setDouble(getPose().getTranslation().getY());
-    poseAngleEntry.setDouble(getPose().getRotation().getDegrees());
-
-    updateCargo();
-    cargoAreaEntry.setDouble(getCargoArea());
-    cargoXEntry.setDouble(getCargoXOffset());
+        Block cargo = pixy.getLargestBlock();
+        cargoAreaEntry.setDouble(pixy.getArea(cargo));
+        cargoXEntry.setDouble(pixy.getX(cargo));
   }
 }
