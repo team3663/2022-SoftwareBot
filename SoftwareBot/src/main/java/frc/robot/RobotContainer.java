@@ -2,12 +2,17 @@ package frc.robot;
 
 import java.util.List;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import frc.robot.commands.AutoFollowCargoCommand;
 import frc.robot.commands.AutoTrajectoryFollowingCommand;
@@ -42,14 +47,20 @@ public class RobotContainer {
   }
 
   public SequentialCommandGroup getAutonomousCommand() {
-    Command followCargo = new AutoFollowCargoCommand(drivetrainSubsystem, pixy);
+    Command followTrajectory = new AutoTrajectoryFollowingCommand(drivetrainSubsystem,
+                                                                  new Pose2d(0, 0, new Rotation2d(0)),
+                                                                  List.of(new Translation2d(1, 0)),
+                                                                  new Pose2d(2, 0, new Rotation2d(0)));
 
-    Pose2d start = new Pose2d(0, 0, new Rotation2d(0));
-    List<Translation2d> waypoints = List.of(new Translation2d(2, 0), new Translation2d(2, 2));
-    Pose2d end = new Pose2d(4, 2, new Rotation2d(0));
-    Command followTrajectory = new AutoTrajectoryFollowingCommand(drivetrainSubsystem, start, waypoints, end);
+    Command followCargo = new AutoFollowCargoCommand(drivetrainSubsystem, pixy);
     
-    return new SequentialCommandGroup(followTrajectory, followCargo);
+    return new SequentialCommandGroup(
+      new InstantCommand(() -> drivetrainSubsystem.resetPose()),
+      new InstantCommand(() -> drivetrainSubsystem.resetGyroscope()),
+      followTrajectory,
+      new InstantCommand(() -> drivetrainSubsystem.followingTrajectory(false))
+      // , followCargo
+      );
 }
 
   private static double deadband(double value, double deadband) {

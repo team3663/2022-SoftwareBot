@@ -77,6 +77,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   private Pixy pixy;
 
+  private boolean followingTrajectory;
+
   public DrivetrainSubsystem(Pixy pixy) {
     ShuffleboardTab drivetrainModuletab = Shuffleboard.getTab("drivetrain_modules");
 
@@ -179,6 +181,10 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
           this.chassisSpeeds = chassisSpeeds;
   }
 
+  public void followingTrajectory(boolean followingTrajectory) {
+          this.followingTrajectory = followingTrajectory;
+  }
+
   public Trajectory getTrajectory(Pose2d start, List<Translation2d> waypoints, Pose2d end) {
         TrajectoryConfig config = new TrajectoryConfig(1.5, 1); // meters per second
         config.setReversed(true);
@@ -188,11 +194,13 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
         return trajectory;
   }
 
+
   public void setModules(SwerveModuleState[] states) {
         frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[0].angle.getRadians());
         frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians());
         backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
-        backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());  
+        backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());
+        odometry.update(getGyroscopeRotation(), states);
   }
 
 @Override
@@ -200,7 +208,10 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
         setModules(states);
-        odometry.updateWithTime(Timer.getFPGATimestamp(), getGyroscopeRotation(), states);
+        
+        if (followingTrajectory) {
+                chassisSpeeds = kinematics.toChassisSpeeds(states);
+        }
 
         driveSignalYEntry.setDouble(chassisSpeeds.vyMetersPerSecond);
         driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond);
