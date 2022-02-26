@@ -20,6 +20,8 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.AutonomousFollowCargoCommand;
 import frc.robot.helpers.Pigeon;
+import frc.robot.helpers.Pixy;
+import io.github.pseudoresonance.pixy2api.Pixy2CCC.Block;
 
 import static frc.robot.Constants.*;
 
@@ -57,15 +59,17 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
-  NetworkTableEntry poseXEntry;
-  NetworkTableEntry poseYEntry;
-  NetworkTableEntry poseAngleEntry;
-  NetworkTableEntry ballAreaEntry;
-  NetworkTableEntry ballXEntry;
-  NetworkTableEntry ballYEntry;
-  NetworkTableEntry driveSignalXEntry;
-  NetworkTableEntry driveSignalYEntry;
-  NetworkTableEntry driveSignalRotationEntry;
+  private NetworkTableEntry poseXEntry;
+  private NetworkTableEntry poseYEntry;
+  private NetworkTableEntry poseAngleEntry;
+  private NetworkTableEntry cargoAreaEntry;
+  private NetworkTableEntry cargoXEntry;
+  private NetworkTableEntry driveSignalXEntry;
+  private NetworkTableEntry driveSignalYEntry;
+  private NetworkTableEntry driveSignalRotationEntry;
+
+  private Pixy pixy;
+  private Block cargo;
 
   public DrivetrainSubsystem() {
     ShuffleboardTab drivetrainModuletab = Shuffleboard.getTab("drivetrain_modules");
@@ -127,16 +131,12 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
                 .withPosition(0, 2)
                 .withSize(1, 1)
                 .getEntry();
-        ballAreaEntry = drivetrainRobotTab.add("Ball Area", 0.0)
+        cargoAreaEntry = drivetrainRobotTab.add("Cargo Area", 0.0)
                 .withPosition(1, 0)
                 .withSize(1, 1)
                 .getEntry();
-        ballXEntry = drivetrainRobotTab.add("Ball X", 0.0)
+        cargoXEntry = drivetrainRobotTab.add("Cargo X", 0.0)
                 .withPosition(1, 1)
-                .withSize(1, 1)
-                .getEntry();
-        ballYEntry = drivetrainRobotTab.add("Ball Y", 0.0)
-                .withPosition(1, 2)
                 .withSize(1, 1)
                 .getEntry();
         ShuffleboardLayout driveSignalContainer = drivetrainRobotTab.getLayout("Drive Signal", BuiltInLayouts.kGrid)
@@ -167,6 +167,22 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
           this.chassisSpeeds = chassisSpeeds;
   }
 
+  public void updateCargo(){
+        cargo = pixy.getLargestBlock();
+  }
+
+  public Block getCargo() {
+          return cargo;
+  }
+
+  public double getCargoArea() {
+          return pixy.getArea(cargo);
+  }
+
+  public double getCargoXOffset() {
+          return pixy.getX(cargo);
+  }
+
 @Override
   public void periodic() {
 
@@ -184,12 +200,12 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
     driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond);
     driveSignalRotationEntry.setDouble(chassisSpeeds.omegaRadiansPerSecond);
 
-    ballAreaEntry.setDouble(AutonomousFollowCargoCommand.getBallArea());
-    ballXEntry.setDouble(AutonomousFollowCargoCommand.getX());
-    ballYEntry.setDouble(AutonomousFollowCargoCommand.getY());
-
     poseXEntry.setDouble(getPose().getTranslation().getX());
     poseYEntry.setDouble(getPose().getTranslation().getY());
     poseAngleEntry.setDouble(getPose().getRotation().getDegrees());
+
+    updateCargo();
+    cargoAreaEntry.setDouble(getCargoArea());
+    cargoXEntry.setDouble(getCargoXOffset());
   }
 }

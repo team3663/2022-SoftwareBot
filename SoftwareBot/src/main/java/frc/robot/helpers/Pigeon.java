@@ -101,8 +101,5 @@ public class Pigeon implements Gyro, Accelerometer {
     // specify exception
     @Override
     public void close() throws Exception {
-    }
-
-
-    
+    } 
 }
