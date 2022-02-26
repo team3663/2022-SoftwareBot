@@ -64,7 +64,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final SwerveModule backLeftModule;
   private final SwerveModule backRightModule;
 
-  private ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
+  public ChassisSpeeds chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
 
   private NetworkTableEntry poseXEntry;
   private NetworkTableEntry poseYEntry;
@@ -200,6 +200,7 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
         frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians());
         backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
         backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());
+        
         odometry.update(getGyroscopeRotation(), states);
   }
 

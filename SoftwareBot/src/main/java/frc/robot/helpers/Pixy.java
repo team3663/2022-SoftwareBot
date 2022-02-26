@@ -16,17 +16,14 @@ public class Pixy {
     private final static int LED_MAX_RBG = 255; // full white
     private final static int LED_MIN_RBG = 0;
 
-    public final static int TEAM_RED = 1;
-    public final static int TEAM_BLUE = 2;
+    public final static int TEAM_RED = 2;
+    public final static int TEAM_BLUE = 1;
     private int teamColor;
 
     private int maxBlocks = 10;
 
     public Pixy(int teamColor) {
         this.teamColor = teamColor;
-    }
-
-    public void initialize() {
         pixy = Pixy2.createInstance(new SPILink());
         pixy.init();
     }

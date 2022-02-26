@@ -28,6 +28,8 @@ public class AutoFollowCargoCommand extends CommandBase {
 
   @Override
   public void initialize() {
+
+    System.out.println("start following cargo");
     drivetrainSubsystem.resetPose();
     drivetrainSubsystem.resetGyroscope();
     pixy.turnOnLights();
@@ -52,13 +54,7 @@ public class AutoFollowCargoCommand extends CommandBase {
       double cargoXOffset = cargo.getX();
       lastXOffset = cargoXOffset;
 
-      double rotationSpeed;
-      if (Math.abs(cargoXOffset - 155) > 3) { // TODO this tolerance doesn't seem to work (try deleting it?)
-        rotationSpeed = rotationPidController.calculate(cargoXOffset);
-      }
-      else {
-        rotationSpeed = 0;
-      }
+      double rotationSpeed = rotationPidController.calculate(cargoXOffset);
       double translationXSpeed = translationXPidController.calculate(cargoArea);
 
       drivetrainSubsystem.drive(new ChassisSpeeds(translationXSpeed, 0, rotationSpeed));

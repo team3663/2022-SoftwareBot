@@ -4,21 +4,22 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 
 public class AutoDriveCommand extends CommandBase {
 
-  private PIDController translationXController = new PIDController(0.6, 0, 0); //10
-  private PIDController translationYController = new PIDController(0, 0, 0);
-  private PIDController rotationController = new PIDController(0, 0, 0);
+  private PIDController translationXController = new PIDController(1, 0, 0); 
+  private PIDController translationYController = new PIDController(1, 0, 0);
+  private PIDController rotationController = new PIDController(1, 0, 0);
 
-  private Pose2d currentPose;
   private double currentAngle;
   private double currentX;
   private double currentY;
+
+  private double targetAngle;
+  private double targetX;
+  private double targetY;
 
   private double translationXSpeed;
   private double translationYSpeed;
@@ -26,14 +27,18 @@ public class AutoDriveCommand extends CommandBase {
 
   private DrivetrainSubsystem drivetrainSubsystem;
 
-  public AutoDriveCommand(DrivetrainSubsystem drivetrainSubsystem, Translation2d targetTranslation, Rotation2d targetRotation) {
+  public AutoDriveCommand(DrivetrainSubsystem drivetrainSubsystem, Pose2d target) {
       this.drivetrainSubsystem = drivetrainSubsystem;
       addRequirements(drivetrainSubsystem);
-      
-      translationXController.setSetpoint(targetTranslation.getX()); 
-      translationYController.setSetpoint(targetTranslation.getY());
 
-      rotationController.setSetpoint(targetRotation.getRadians());
+      targetAngle = target.getRotation().getRadians();
+      targetX = target.getX();
+      targetY = target.getY();
+      
+      translationXController.setSetpoint(targetX); 
+      translationYController.setSetpoint(targetY);
+
+      rotationController.setSetpoint(targetAngle);
       rotationController.enableContinuousInput(0, 2 * Math.PI);
   }
 
@@ -43,32 +48,41 @@ public class AutoDriveCommand extends CommandBase {
     drivetrainSubsystem.resetGyroscope();
   }
 
-  // TODO see if I can get rid of the cap method
   @Override
   public void execute() {
-    currentPose = drivetrainSubsystem.getPose();
+    Pose2d currentPose = drivetrainSubsystem.getPose();
     currentX = currentPose.getX();
     currentY = currentPose.getY();
     currentAngle = currentPose.getRotation().getRadians();
 
-    translationXSpeed = cap(translationXController.calculate(currentX));
-    translationYSpeed = cap(translationYController.calculate(currentY));
-    rotationSpeed = cap(rotationController.calculate(currentAngle));
+    translationXSpeed = translationXController.calculate(currentX);
+    translationYSpeed = translationYController.calculate(currentY);
+    rotationSpeed = rotationController.calculate(currentAngle);
 
-    drivetrainSubsystem.drive(new ChassisSpeeds(translationXSpeed, translationYSpeed, rotationSpeed));
-  }
+    System.out.println(translationXSpeed + ", " + translationYSpeed + ", " + rotationSpeed);
 
-  private double cap(double value) {
-    return Math.max(-1, Math.min(value, 1));
+    drivetrainSubsystem.drive(ChassisSpeeds.fromFieldRelativeSpeeds(translationXSpeed, translationYSpeed, rotationSpeed,
+                                                                    drivetrainSubsystem.getGyroscopeRotation()));
   }
 
   @Override
   public void end(boolean interrupted) {
     drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, 0));
+    System.out.println("auto drive forward ends");
   }
 
   @Override
   public boolean isFinished() {
-    return false;
+    boolean atTarget = false;
+    if ((Math.abs(targetAngle - currentAngle) < Math.toRadians(2)) && (Math.abs(targetX - currentX) < 0.02) && (Math.abs(targetY - currentY) < 0.02)) {
+      atTarget = true;
+    }
+
+    boolean slowSpeed = false;
+    if (Math.abs(translationXSpeed) < 0.05 && Math.abs(translationYSpeed) < 0.05 && Math.abs(rotationSpeed) < 0.5) {
+      slowSpeed = true;
+    }
+    
+    return (atTarget || slowSpeed);
   }
 }

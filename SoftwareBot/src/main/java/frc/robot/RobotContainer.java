@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
+import frc.robot.commands.AutoDriveCommand;
 import frc.robot.commands.AutoFollowCargoCommand;
 import frc.robot.commands.AutoTrajectoryFollowingCommand;
 import frc.robot.commands.DefaultDriveCommand;
@@ -37,8 +38,6 @@ public class RobotContainer {
     ));
 
     configureButtonBindings();
-
-    pixy.initialize();
   }
 
   private void configureButtonBindings() {
@@ -47,19 +46,21 @@ public class RobotContainer {
   }
 
   public SequentialCommandGroup getAutonomousCommand() {
+    /*
     Command followTrajectory = new AutoTrajectoryFollowingCommand(drivetrainSubsystem,
                                                                   new Pose2d(0, 0, new Rotation2d(0)),
                                                                   List.of(new Translation2d(1, 0)),
                                                                   new Pose2d(2, 0, new Rotation2d(0)));
+    */
 
+    Command driveForward = new AutoDriveCommand(drivetrainSubsystem, new Pose2d(2, 0, Rotation2d.fromDegrees(90)));
     Command followCargo = new AutoFollowCargoCommand(drivetrainSubsystem, pixy);
     
     return new SequentialCommandGroup(
       new InstantCommand(() -> drivetrainSubsystem.resetPose()),
       new InstantCommand(() -> drivetrainSubsystem.resetGyroscope()),
-      followTrajectory,
-      new InstantCommand(() -> drivetrainSubsystem.followingTrajectory(false))
-      // , followCargo
+      driveForward,
+      followCargo
       );
 }
 
