@@ -37,7 +37,6 @@ public class AutoDriveCommand extends CommandBase {
 
   @Override
   public void initialize(){
-    drivetrain.resetPose();
     drivetrain.resetGyroscope();
   }
 

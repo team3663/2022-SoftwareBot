@@ -17,13 +17,14 @@ import edu.wpi.first.wpilibj2.command.button.Button;
 import frc.robot.commands.AutoDriveCommand;
 import frc.robot.commands.AutoFollowCargoCommand;
 import frc.robot.commands.DefaultDriveCommand;
+import frc.robot.commands.Wait;
 import frc.robot.helpers.Pixy;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 // declare subsystems, commands, and button mappings
 public class RobotContainer {
   
-  private final Pixy pixy = new Pixy(Pixy.TEAM_RED);
+  // private final Pixy pixy = new Pixy(Pixy.TEAM_RED);
 
   private final DrivetrainSubsystem drivetrainSubsystem = new DrivetrainSubsystem(); // pixy
   private final XboxController controller = new XboxController(0);
@@ -45,14 +46,15 @@ public class RobotContainer {
   }
 
   public SequentialCommandGroup getAutonomousCommand() {
-
-    Command autoDrive = new AutoDriveCommand(drivetrainSubsystem, 3, 0, 0);
-    // start to second ball (3, 0)
-    // second ball to third ball (2, 3.5)
-    // third ball to station (7)
-    Command followCargo = new AutoFollowCargoCommand(drivetrainSubsystem, pixy);
-    
-    return new SequentialCommandGroup(autoDrive);
+    return new SequentialCommandGroup(
+            new InstantCommand(() -> drivetrainSubsystem.setInitPose(new Pose2d(2.77, -0.65, new Rotation2d()))),
+            new AutoDriveCommand(drivetrainSubsystem, 3.79, -0.65, 0),
+            new Wait(drivetrainSubsystem, 3),
+            new AutoDriveCommand(drivetrainSubsystem, 2.22, -3.15, -45),
+            new Wait(drivetrainSubsystem, 3),
+            new AutoDriveCommand(drivetrainSubsystem, 2.99, -7.12, 0),
+            new Wait(drivetrainSubsystem, 2),
+            new AutoDriveCommand(drivetrainSubsystem, 2.22, -3.15, 0));
   }
 
   private static double deadband(double value, double deadband) {
