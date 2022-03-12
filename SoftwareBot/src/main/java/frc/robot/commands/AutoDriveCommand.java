@@ -2,7 +2,6 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -25,7 +24,7 @@ public class AutoDriveCommand extends CommandBase {
       addRequirements(drivetrain);
 
       controllerX.setGoal(targetX); 
-      controllerX.setTolerance(0.01); // TODO tune
+      controllerX.setTolerance(0.01);
 
       controllerY.setGoal(targetY); 
       controllerY.setTolerance(0.01);
@@ -51,7 +50,7 @@ public class AutoDriveCommand extends CommandBase {
     double speedY = controllerY.calculate(currentY);
     double speedT = controllerT.calculate(currentT);
 
-    drivetrain.drive(ChassisSpeeds.fromFieldRelativeSpeeds(speedX, speedY, 0, drivetrain.getGyroscopeRotation()));
+    drivetrain.drive(ChassisSpeeds.fromFieldRelativeSpeeds(speedX, speedY, speedT, drivetrain.getGyroscopeRotation()));
   }
 
   @Override

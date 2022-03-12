@@ -7,6 +7,9 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -46,6 +49,7 @@ public class RobotContainer {
   }
 
   public SequentialCommandGroup getAutonomousCommand() {
+    /* 
     return new SequentialCommandGroup(
             new InstantCommand(() -> drivetrainSubsystem.setInitPose(new Pose2d(2.77, -0.65, new Rotation2d()))),
             new AutoDriveCommand(drivetrainSubsystem, 3.79, -0.65, 0),
@@ -55,6 +59,24 @@ public class RobotContainer {
             new AutoDriveCommand(drivetrainSubsystem, 2.99, -7.12, 0),
             new Wait(drivetrainSubsystem, 2),
             new AutoDriveCommand(drivetrainSubsystem, 2.22, -3.15, 0));
+    */
+
+    // tune rotation pid
+    /*
+    return new AutoDriveCommand(drivetrainSubsystem, 0, 0, 45);
+    */
+
+    // drive through balls
+    return new SequentialCommandGroup(
+            new InstantCommand(() -> drivetrainSubsystem.setInitPose(new Pose2d(2.77, -0.65, new Rotation2d()))),
+            new AutoDriveCommand(drivetrainSubsystem, 3.92, -0.65, 0),
+            new Wait(drivetrainSubsystem, 3),
+            new AutoDriveCommand(drivetrainSubsystem, 2.15, -3.26, 302.13),
+            new AutoDriveCommand(drivetrainSubsystem, 0, 0, 270),
+            new Wait(drivetrainSubsystem, 3),
+            new AutoDriveCommand(drivetrainSubsystem, 3.02, -7.24, 257.72),
+            new Wait(drivetrainSubsystem, 1),
+            new AutoDriveCommand(drivetrainSubsystem, 3.02, -3.02, 225));
   }
 
   private static double deadband(double value, double deadband) {
@@ -75,4 +97,55 @@ public class RobotContainer {
 
     return value;
   }
+
+  /*
+  public Command createTrajectoryCommand() {
+    TrajectoryConfig config = new TrajectoryConfig(1.5, 1);
+    config.setReversed(true);
+    
+    Trajectory trajectory = TrajectoryGenerator.generateTrajectory(
+        new Pose2d(0, 0, new Rotation2d(0)),                        // Start at the origin facing the +X direction       
+        List.of(new Translation2d(2, 0),new Translation2d(2, 2)), // Pass through these two interior waypoints, making an 's' curve path
+        new Pose2d(4, 2, new Rotation2d(0)),                        // End 3 meters straight ahead of where we started, facing forward
+        config);
+
+    double totalTimeSeconds = trajectory.getTotalTimeSeconds();
+    System.out.println("-----------------------------> totalTimeSeconds: " + totalTimeSeconds);
+
+    double kpX = 0.0000000001;  //.01 for both X and Y
+    double kpY = 0.0000000001;
+    double kiX = 0.0;
+    double kiY = 0.0;
+    double kdX = 0.0;
+    double kdY = 0.0;
+    PIDController xController = new PIDController(kpX, kiX, kdX); 
+    PIDController yController = new PIDController(kpY, kiY, kdY); 
+
+
+    double kPhysicalMaxAngularSpeedRadiansPerSecond = 2 * 2 * Math.PI;
+    double kMaxAngularSpeedRadiansPerSecond = kPhysicalMaxAngularSpeedRadiansPerSecond / 10;
+    double kMaxAngularAccelerationRadiansPerSecondSquared = Math.PI / 4;
+
+    TrapezoidProfile.Constraints thetaControllerConstraints = new TrapezoidProfile.Constraints(
+        kMaxAngularSpeedRadiansPerSecond,
+        kMaxAngularAccelerationRadiansPerSecondSquared);
+
+    double kpTheta = 0.04;   // .04
+    double kiTheta = 0.0;
+    double kdTheta = 0.0;
+    ProfiledPIDController thetaController = new ProfiledPIDController(kpTheta, kiTheta, kdTheta, thetaControllerConstraints); 
+
+    Command autoCommand = new SwerveControllerCommand(
+      trajectory,
+      drivetrainSubsystem::getPose,
+      drivetrainSubsystem.getKinematics(),
+      xController,
+      yController,
+      thetaController,
+      drivetrainSubsystem::setModules,
+      drivetrainSubsystem);
+
+      return autoCommand;
+  }
+  */
 }
