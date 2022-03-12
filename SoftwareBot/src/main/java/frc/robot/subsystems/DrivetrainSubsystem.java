@@ -35,7 +35,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public static final double WHEEL_DIAMETER_METERS = 0.1016;
 
   public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 *
-          SdsModuleConfigurations.MK4_L4.getDriveReduction() * WHEEL_DIAMETER_METERS * Math.PI;
+          SdsModuleConfigurations.MK4_L2.getDriveReduction() * WHEEL_DIAMETER_METERS * Math.PI;
 
   public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND /
           Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
@@ -55,6 +55,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   );
 
   private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(), new Pose2d());
+  private Pose2d currentPose;
 
   private final Pigeon pigeon = new Pigeon(DRIVETRAIN_PIGEON_ID);
         // counter-clockwise rotation increases angle
@@ -75,18 +76,16 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private NetworkTableEntry driveSignalYEntry;
   private NetworkTableEntry driveSignalRotationEntry;
 
-  private Pixy pixy;
+  // private Pixy pixy;
 
-  private boolean followingTrajectory;
-
-  public DrivetrainSubsystem(Pixy pixy) {
+  public DrivetrainSubsystem() { // Pixy pixy
     ShuffleboardTab drivetrainModuletab = Shuffleboard.getTab("drivetrain_modules");
 
     frontLeftModule = Mk4SwerveModuleHelper.createFalcon500(
             drivetrainModuletab.getLayout("Front Left Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(0, 0),
-            Mk4SwerveModuleHelper.GearRatio.L4,
+            Mk4SwerveModuleHelper.GearRatio.L2,
             FRONT_LEFT_MODULE_DRIVE_MOTOR,
             FRONT_LEFT_MODULE_STEER_MOTOR,
             FRONT_LEFT_MODULE_STEER_ENCODER,
@@ -97,7 +96,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             drivetrainModuletab.getLayout("Front Right Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(2, 0),
-            Mk4SwerveModuleHelper.GearRatio.L4,
+            Mk4SwerveModuleHelper.GearRatio.L2,
             FRONT_RIGHT_MODULE_DRIVE_MOTOR,
             FRONT_RIGHT_MODULE_STEER_MOTOR,
             FRONT_RIGHT_MODULE_STEER_ENCODER,
@@ -108,7 +107,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             drivetrainModuletab.getLayout("Back Left Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(4, 0),
-            Mk4SwerveModuleHelper.GearRatio.L4,
+            Mk4SwerveModuleHelper.GearRatio.L2,
             BACK_LEFT_MODULE_DRIVE_MOTOR,
             BACK_LEFT_MODULE_STEER_MOTOR,
             BACK_LEFT_MODULE_STEER_ENCODER,
@@ -119,7 +118,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             drivetrainModuletab.getLayout("Back Right Module", BuiltInLayouts.kList)
                     .withSize(2, 4)
                     .withPosition(6, 0),
-            Mk4SwerveModuleHelper.GearRatio.L4,
+            Mk4SwerveModuleHelper.GearRatio.L2,
             BACK_RIGHT_MODULE_DRIVE_MOTOR,
             BACK_RIGHT_MODULE_STEER_MOTOR,
             BACK_RIGHT_MODULE_STEER_ENCODER,
@@ -154,7 +153,7 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
                 driveSignalXEntry = driveSignalContainer.add("Drive Signal Forward", 0.0).getEntry();
                 driveSignalRotationEntry = driveSignalContainer.add("Drive Signal Rotation", 0.0).getEntry();
 
-        this.pixy = pixy;
+        // this.pixy = pixy;
   }
 
   public SwerveDriveKinematics getKinematics() {
@@ -166,7 +165,7 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
   }
 
   public Pose2d getPose() {
-          return odometry.getPoseMeters();
+          return currentPose;
   }
 
   public void resetGyroscope() {
@@ -181,27 +180,11 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
           this.chassisSpeeds = chassisSpeeds;
   }
 
-  public void followingTrajectory(boolean followingTrajectory) {
-          this.followingTrajectory = followingTrajectory;
-  }
-
-  public Trajectory getTrajectory(Pose2d start, List<Translation2d> waypoints, Pose2d end) {
-        TrajectoryConfig config = new TrajectoryConfig(1.5, 1); // meters per second
-        config.setReversed(true);
-
-        Trajectory trajectory = TrajectoryGenerator.generateTrajectory(start, waypoints, end, config);
-
-        return trajectory;
-  }
-
-
   public void setModules(SwerveModuleState[] states) {
         frontLeftModule.set(states[0].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[0].angle.getRadians());
         frontRightModule.set(states[1].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[1].angle.getRadians());
         backLeftModule.set(states[2].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[2].angle.getRadians());
         backRightModule.set(states[3].speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE, states[3].angle.getRadians());
-        
-        odometry.update(getGyroscopeRotation(), states);
   }
 
 @Override
@@ -209,10 +192,19 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states, MAX_VELOCITY_METERS_PER_SECOND);
         setModules(states);
+
+        SwerveModuleState currentFrontLeft = new SwerveModuleState(frontLeftModule.getDriveVelocity(), new Rotation2d(frontLeftModule.getSteerAngle()));
+        SwerveModuleState currentFrontRight = new SwerveModuleState(frontRightModule.getDriveVelocity(), new Rotation2d(frontRightModule.getSteerAngle()));
+        SwerveModuleState currentBackLeft = new SwerveModuleState(backLeftModule.getDriveVelocity(), new Rotation2d(backLeftModule.getSteerAngle()));
+        SwerveModuleState currentBackRight = new SwerveModuleState(backRightModule.getDriveVelocity(), new Rotation2d(backRightModule.getSteerAngle()));
         
-        if (followingTrajectory) {
-                chassisSpeeds = kinematics.toChassisSpeeds(states);
-        }
+        SwerveModuleState[] currentStates = new SwerveModuleState[4];
+        currentStates[0] = currentFrontLeft;
+        currentStates[1] = currentFrontRight;
+        currentStates[2] = currentBackLeft;
+        currentStates[3] = currentBackRight;
+        
+        currentPose = odometry.update(getGyroscopeRotation(), currentStates);
 
         driveSignalYEntry.setDouble(chassisSpeeds.vyMetersPerSecond);
         driveSignalXEntry.setDouble(chassisSpeeds.vxMetersPerSecond);
@@ -222,8 +214,10 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
         poseYEntry.setDouble(getPose().getTranslation().getY());
         poseAngleEntry.setDouble(getPose().getRotation().getDegrees());
 
+        /*
         Block cargo = pixy.getLargestBlock();
         cargoAreaEntry.setDouble(pixy.getArea(cargo));
         cargoXEntry.setDouble(pixy.getX(cargo));
+        */
   }
 }

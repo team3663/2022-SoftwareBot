@@ -3,86 +3,65 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 
 public class AutoDriveCommand extends CommandBase {
 
-  private PIDController translationXController = new PIDController(1, 0, 0); 
-  private PIDController translationYController = new PIDController(1, 0, 0);
-  private PIDController rotationController = new PIDController(1, 0, 0);
+  private TrapezoidProfile.Constraints translationConstraints = new Constraints(2, 2); // TODO tune
+  private TrapezoidProfile.Constraints rotationConstraints = new Constraints(2, 2);
 
-  private double currentAngle;
-  private double currentX;
-  private double currentY;
+  private ProfiledPIDController controllerX = new ProfiledPIDController(5, 0, 0, translationConstraints); // TODO tune
+  private ProfiledPIDController controllerY = new ProfiledPIDController(5, 0, 0, translationConstraints);
+  private ProfiledPIDController controllerT = new ProfiledPIDController(0, 0, 0, rotationConstraints);
 
-  private double targetAngle;
-  private double targetX;
-  private double targetY;
+  private DrivetrainSubsystem drivetrain;
 
-  private double translationXSpeed;
-  private double translationYSpeed;
-  private double rotationSpeed;
+  public AutoDriveCommand(DrivetrainSubsystem drivetrain, double targetX, double targetY, double targetT) {
+      this.drivetrain = drivetrain;
+      addRequirements(drivetrain);
 
-  private DrivetrainSubsystem drivetrainSubsystem;
+      controllerX.setGoal(targetX); 
+      controllerX.setTolerance(0.01); // TODO tune
 
-  public AutoDriveCommand(DrivetrainSubsystem drivetrainSubsystem, Pose2d target) {
-      this.drivetrainSubsystem = drivetrainSubsystem;
-      addRequirements(drivetrainSubsystem);
+      controllerY.setGoal(targetY); 
+      controllerY.setTolerance(0.01);
 
-      targetAngle = target.getRotation().getRadians();
-      targetX = target.getX();
-      targetY = target.getY();
-      
-      translationXController.setSetpoint(targetX); 
-      translationYController.setSetpoint(targetY);
-
-      rotationController.setSetpoint(targetAngle);
-      rotationController.enableContinuousInput(0, 2 * Math.PI);
+      controllerT.setGoal(Math.toRadians(targetT));
+      controllerT.setTolerance(0.01);
+      controllerT.enableContinuousInput(0, 2 * Math.PI);
   }
 
   @Override
   public void initialize(){
-    drivetrainSubsystem.resetPose();
-    drivetrainSubsystem.resetGyroscope();
+    drivetrain.resetPose();
+    drivetrain.resetGyroscope();
   }
 
   @Override
   public void execute() {
-    Pose2d currentPose = drivetrainSubsystem.getPose();
-    currentX = currentPose.getX();
-    currentY = currentPose.getY();
-    currentAngle = currentPose.getRotation().getRadians();
+    Pose2d currentPose = drivetrain.getPose();
+    double currentX = currentPose.getX();
+    double currentY = currentPose.getY();
+    double currentT = currentPose.getRotation().getRadians();
 
-    translationXSpeed = translationXController.calculate(currentX);
-    translationYSpeed = translationYController.calculate(currentY);
-    rotationSpeed = rotationController.calculate(currentAngle);
+    double speedX = controllerX.calculate(currentX);
+    double speedY = controllerY.calculate(currentY);
+    double speedT = controllerT.calculate(currentT);
 
-    System.out.println(translationXSpeed + ", " + translationYSpeed + ", " + rotationSpeed);
-
-    drivetrainSubsystem.drive(ChassisSpeeds.fromFieldRelativeSpeeds(translationXSpeed, translationYSpeed, rotationSpeed,
-                                                                    drivetrainSubsystem.getGyroscopeRotation()));
+    drivetrain.drive(ChassisSpeeds.fromFieldRelativeSpeeds(speedX, speedY, 0, drivetrain.getGyroscopeRotation()));
   }
 
   @Override
   public void end(boolean interrupted) {
-    drivetrainSubsystem.drive(new ChassisSpeeds(0, 0, 0));
-    System.out.println("auto drive forward ends");
+    drivetrain.drive(new ChassisSpeeds(0, 0, 0));
   }
 
   @Override
   public boolean isFinished() {
-    boolean atTarget = false;
-    if ((Math.abs(targetAngle - currentAngle) < Math.toRadians(2)) && (Math.abs(targetX - currentX) < 0.02) && (Math.abs(targetY - currentY) < 0.02)) {
-      atTarget = true;
-    }
-
-    boolean slowSpeed = false;
-    if (Math.abs(translationXSpeed) < 0.05 && Math.abs(translationYSpeed) < 0.05 && Math.abs(rotationSpeed) < 0.5) {
-      slowSpeed = true;
-    }
-    
-    return (atTarget || slowSpeed);
+    return controllerX.atGoal() && controllerY.atGoal() && controllerT.atGoal();
   }
 }
