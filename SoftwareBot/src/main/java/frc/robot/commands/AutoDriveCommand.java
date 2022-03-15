@@ -13,9 +13,11 @@ import edu.wpi.first.wpilibj.Timer;
 public class AutoDriveCommand extends CommandBase {
 
   private TrapezoidProfile.Constraints translationConstraints = new Constraints(2, 2); // 3, 3
+  private TrapezoidProfile.Constraints rotationConstraints = new Constraints(2, 2); // 3, 3
+  
   private ProfiledPIDController controllerX = new ProfiledPIDController(2.5, 0, 0, translationConstraints);
   private ProfiledPIDController controllerY = new ProfiledPIDController(2.5, 0, 0, translationConstraints);
-  private PIDController controllerT = new PIDController(3, 0, 0);
+  private ProfiledPIDController controllerT = new ProfiledPIDController(3, 0, 0, rotationConstraints);
 
   private double speedX;
   private double speedY;
@@ -38,7 +40,7 @@ public class AutoDriveCommand extends CommandBase {
       controllerY.setTolerance(0.01);
 
       double targetT = targetCoordinate.getRotation().getRadians() - startingCoordinate.getRotation().getRadians();
-      controllerT.setSetpoint(targetT);
+      controllerT.setGoal(targetT);
       controllerT.setTolerance(Math.toRadians(2));
       controllerT.enableContinuousInput(0, 2 * Math.PI);
   }
@@ -72,16 +74,7 @@ public class AutoDriveCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    boolean atGoal = false;
-    boolean slowSpeed = false;
 
-    if (controllerX.atGoal() && controllerY.atGoal() && controllerT.atSetpoint()) {
-      atGoal = true;
-    }
-    if (timer.hasElapsed(1) && speedX < 0.01 && speedY < 0.01 && speedT < 0.01) {
-      slowSpeed = true;
-    }
-
-    return atGoal || slowSpeed;
+    return controllerX.atGoal() && controllerY.atGoal() && controllerT.atGoal();
   }
 }
