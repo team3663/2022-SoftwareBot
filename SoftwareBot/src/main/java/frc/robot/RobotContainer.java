@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import frc.robot.commands.AutoDriveCommand;
@@ -30,8 +31,7 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
-    new Button(controller::getBackButton).whenPressed(drivetrainSubsystem::resetGyroscope);
-    new Button(controller::getStartButton).whenPressed(drivetrainSubsystem::resetPose);
+    new Button(controller::getBackButton).whenPressed(drivetrainSubsystem::resetPose);
   }
 
   public Command getAutonomousCommand() {
@@ -42,8 +42,6 @@ public class RobotContainer {
     Pose2d aim3 = new Pose2d(2.15, -3.26, Rotation2d.fromDegrees(270));
     Pose2d station = new Pose2d(3.02, -7.24, new Rotation2d(257.72));
 
-    return new AutoDriveCommand(drivetrainSubsystem, start, ball2);
-    
     /*
     return new SequentialCommandGroup(
       new AutoDriveCommand(drivetrainSubsystem, start, ball2),
@@ -52,33 +50,17 @@ public class RobotContainer {
       new AutoDriveCommand(drivetrainSubsystem, aim3, station),
       new AutoDriveCommand(drivetrainSubsystem, station, aim3)
       );
-    */
-      
-    // drive through balls
-    /*
-    return new SequentialCommandGroup(
-            new InstantCommand(() -> drivetrainSubsystem.setInitPose(new Pose2d(2.77, -0.65, new Rotation2d()))),
-            new AutoDriveCommand(drivetrainSubsystem, 3.92, -0.65, 0),
-            new Wait(drivetrainSubsystem, 3),
-            new AutoDriveCommand(drivetrainSubsystem, 2.15, -3.26, 302.13),
-            new AutoDriveCommand(drivetrainSubsystem, 0, 0, 270),
-            new Wait(drivetrainSubsystem, 3),
-            new AutoDriveCommand(drivetrainSubsystem, 3.02, -7.24, 257.72),
-            new Wait(drivetrainSubsystem, 1),
-            new AutoDriveCommand(drivetrainSubsystem, 3.02, -3.02, 225));
-            */
+      */
 
-    /* 
+    
+    
     return new SequentialCommandGroup(
-            new InstantCommand(() -> drivetrainSubsystem.setInitPose(new Pose2d(2.77, -0.65, new Rotation2d()))),
-            new AutoDriveCommand(drivetrainSubsystem, 3.79, -0.65, 0),
-            new Wait(drivetrainSubsystem, 3),
-            new AutoDriveCommand(drivetrainSubsystem, 2.22, -3.15, -45),
-            new Wait(drivetrainSubsystem, 3),
-            new AutoDriveCommand(drivetrainSubsystem, 2.99, -7.12, 0),
-            new Wait(drivetrainSubsystem, 2),
-            new AutoDriveCommand(drivetrainSubsystem, 2.22, -3.15, 0));
-    */
+            new InstantCommand(() -> drivetrainSubsystem.setAutoInitCommand()),
+            new AutoDriveCommand(drivetrainSubsystem, 3.92, -0.65, 0),
+            new AutoDriveCommand(drivetrainSubsystem, 2.15, -3.26, 302.13),
+            new AutoDriveCommand(drivetrainSubsystem, 2.15, -3.26, 270),
+            new AutoDriveCommand(drivetrainSubsystem, 3.02, -7.24, 257.72),
+            new AutoDriveCommand(drivetrainSubsystem, 2.15, -3.26, 270));
   }
 
   private static double deadband(double value, double deadband) {

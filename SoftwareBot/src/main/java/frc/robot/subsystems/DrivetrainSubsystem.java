@@ -150,10 +150,14 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
   }
 
   public void resetGyroscope() {
-          pigeon.reset();
+          //pigeon.reset();
   }
 
-  public Rotation2d getGyroscopeRotation() {
+  public void setAutoInitCommand() {
+          odometry.resetPosition(new Pose2d(2.77, -0.65, new Rotation2d()), getGyroscopeRotation());
+  }
+
+  private Rotation2d getGyroscopeRotation() {
           return Rotation2d.fromDegrees(pigeon.getAngle());
   }
 
