@@ -45,7 +45,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
           new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0)
   );
 
-  private SwerveDriveOdometry odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(), new Pose2d());
+  private final SwerveDriveOdometry odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(), new Pose2d());
   private Pose2d currentPose;
 
   private final Pigeon pigeon = new Pigeon(DRIVETRAIN_PIGEON_ID);
@@ -143,10 +143,6 @@ ShuffleboardTab drivetrainRobotTab = Shuffleboard.getTab("drivetrain_robot");
 
   public void resetPose() {
           odometry.resetPosition(new Pose2d(), getGyroscopeRotation());
-  }
-
-  public void setInitPose(Pose2d initPose) {
-          odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(), initPose);
   }
 
   public Pose2d getPose() {

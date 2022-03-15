@@ -1,27 +1,13 @@
 package frc.robot;
 
-import java.util.List;
-
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import frc.robot.commands.AutoDriveCommand;
-import frc.robot.commands.AutoFollowCargoCommand;
 import frc.robot.commands.DefaultDriveCommand;
-import frc.robot.commands.Wait;
-import frc.robot.helpers.Pixy;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
 // declare subsystems, commands, and button mappings
@@ -48,7 +34,40 @@ public class RobotContainer {
     new Button(controller::getStartButton).whenPressed(drivetrainSubsystem::resetPose);
   }
 
-  public SequentialCommandGroup getAutonomousCommand() {
+  public Command getAutonomousCommand() {
+
+    Pose2d start = new Pose2d(2.77, -0.65, new Rotation2d());
+    Pose2d ball2 = new Pose2d(3.92, -0.65, new Rotation2d());
+    Pose2d ball3 = new Pose2d(2.15, -3.26, Rotation2d.fromDegrees(302.13));
+    Pose2d aim3 = new Pose2d(2.15, -3.26, Rotation2d.fromDegrees(270));
+    Pose2d station = new Pose2d(3.02, -7.24, new Rotation2d(257.72));
+
+    return new AutoDriveCommand(drivetrainSubsystem, start, ball2);
+    
+    /*
+    return new SequentialCommandGroup(
+      new AutoDriveCommand(drivetrainSubsystem, start, ball2),
+      new AutoDriveCommand(drivetrainSubsystem, ball2, ball3),
+      new AutoDriveCommand(drivetrainSubsystem, ball3, aim3),
+      new AutoDriveCommand(drivetrainSubsystem, aim3, station),
+      new AutoDriveCommand(drivetrainSubsystem, station, aim3)
+      );
+    */
+      
+    // drive through balls
+    /*
+    return new SequentialCommandGroup(
+            new InstantCommand(() -> drivetrainSubsystem.setInitPose(new Pose2d(2.77, -0.65, new Rotation2d()))),
+            new AutoDriveCommand(drivetrainSubsystem, 3.92, -0.65, 0),
+            new Wait(drivetrainSubsystem, 3),
+            new AutoDriveCommand(drivetrainSubsystem, 2.15, -3.26, 302.13),
+            new AutoDriveCommand(drivetrainSubsystem, 0, 0, 270),
+            new Wait(drivetrainSubsystem, 3),
+            new AutoDriveCommand(drivetrainSubsystem, 3.02, -7.24, 257.72),
+            new Wait(drivetrainSubsystem, 1),
+            new AutoDriveCommand(drivetrainSubsystem, 3.02, -3.02, 225));
+            */
+
     /* 
     return new SequentialCommandGroup(
             new InstantCommand(() -> drivetrainSubsystem.setInitPose(new Pose2d(2.77, -0.65, new Rotation2d()))),
@@ -60,23 +79,6 @@ public class RobotContainer {
             new Wait(drivetrainSubsystem, 2),
             new AutoDriveCommand(drivetrainSubsystem, 2.22, -3.15, 0));
     */
-
-    // tune rotation pid
-    /*
-    return new AutoDriveCommand(drivetrainSubsystem, 0, 0, 45);
-    */
-
-    // drive through balls
-    return new SequentialCommandGroup(
-            new InstantCommand(() -> drivetrainSubsystem.setInitPose(new Pose2d(2.77, -0.65, new Rotation2d()))),
-            new AutoDriveCommand(drivetrainSubsystem, 3.92, -0.65, 0),
-            new Wait(drivetrainSubsystem, 3),
-            new AutoDriveCommand(drivetrainSubsystem, 2.15, -3.26, 302.13),
-            new AutoDriveCommand(drivetrainSubsystem, 0, 0, 270),
-            new Wait(drivetrainSubsystem, 3),
-            new AutoDriveCommand(drivetrainSubsystem, 3.02, -7.24, 257.72),
-            new Wait(drivetrainSubsystem, 1),
-            new AutoDriveCommand(drivetrainSubsystem, 3.02, -3.02, 225));
   }
 
   private static double deadband(double value, double deadband) {
