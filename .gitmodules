@@ -1,0 +1,3 @@
+[submodule "SoftwareBot/common"]
+	path = SoftwareBot/common
+	url = https://github.com/FRCTeam2910/Common.git
