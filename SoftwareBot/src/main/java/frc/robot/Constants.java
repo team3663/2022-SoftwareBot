@@ -6,6 +6,8 @@ public final class Constants {
 
     // front to back wheel, center to center
     public static final double DRIVETRAIN_WHEELBASE_METERS = 0.5461; // 21.5 inches
+    
+    public static final double DRIVE_TRAIN_WHEEL_DIAMETER_METERS = 0.106325;
 
     public static final int DRIVETRAIN_PIGEON_ID = 13;
 

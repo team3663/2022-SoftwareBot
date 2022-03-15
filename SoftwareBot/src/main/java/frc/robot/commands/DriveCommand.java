@@ -6,14 +6,14 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 
 import java.util.function.DoubleSupplier;
 
-public class DefaultDriveCommand extends CommandBase {
+public class DriveCommand extends CommandBase {
     private final DrivetrainSubsystem drivetrainSubsystem;
 
     private final DoubleSupplier translationXSupplier;
     private final DoubleSupplier translationYSupplier;
     private final DoubleSupplier rotationSupplier;
 
-    public DefaultDriveCommand(DrivetrainSubsystem drivetrainSubsystem,
+    public DriveCommand(DrivetrainSubsystem drivetrainSubsystem,
                                DoubleSupplier translationXSupplier,
                                DoubleSupplier translationYSupplier,
                                DoubleSupplier rotationSupplier) {
@@ -28,7 +28,7 @@ public class DefaultDriveCommand extends CommandBase {
     @Override
     public void initialize() {
         drivetrainSubsystem.resetPosition();
-        drivetrainSubsystem.resetGyroscope();
+        drivetrainSubsystem.resetInvertGyroscope();
     }
 
     @Override
@@ -38,7 +38,7 @@ public class DefaultDriveCommand extends CommandBase {
                         translationXSupplier.getAsDouble(),
                         translationYSupplier.getAsDouble(),
                         rotationSupplier.getAsDouble(),
-                        drivetrainSubsystem.getPose().getRotation()
+                        drivetrainSubsystem.getGyroscopeRotation()
                 ));
     }
 

@@ -30,7 +30,7 @@ public class AutoFollowCargoCommand extends CommandBase {
   public void initialize() {
 
     System.out.println("start following cargo");
-    drivetrainSubsystem.resetPose();
+    drivetrainSubsystem.resetPosition();
     drivetrainSubsystem.resetGyroscope();
     pixy.turnOnLights();
   }
