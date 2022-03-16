@@ -1,11 +1,13 @@
 package frc.robot;
 
+import edu.wpi.first.math.util.Units;
+
 public final class Constants {
     // left to right wheel, center to center
-    public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.5461; // 21.5 inches
+    public static final double DRIVETRAIN_TRACKWIDTH_METERS = Units.inchesToMeters(21); // 21.5 inches
 
     // front to back wheel, center to center
-    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.5461; // 21.5 inches
+    public static final double DRIVETRAIN_WHEELBASE_METERS = Units.inchesToMeters(21); // 21.5 inches
     
     public static final double DRIVE_TRAIN_WHEEL_DIAMETER_METERS = 0.106325;
 

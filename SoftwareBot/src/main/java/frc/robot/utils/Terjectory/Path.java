@@ -44,7 +44,7 @@ public class Path{
         kMaxAngularSpeedRadiansPerSecond,
         kMaxAngularAccelerationRadiansPerSecondSquared);
 
-	double kpTheta = 0.0001;   // .04
+	double kpTheta = 0.001;   // .04
     double kiTheta = 0.0;
     double kdTheta = 0.0;
     ProfiledPIDController thetaController = new ProfiledPIDController(kpTheta, kiTheta, kdTheta, thetaControllerConstraints); 

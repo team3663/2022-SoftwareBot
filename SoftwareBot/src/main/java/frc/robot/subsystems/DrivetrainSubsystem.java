@@ -24,7 +24,7 @@ import frc.robot.utils.SwerveDriveConfig;
 public class DrivetrainSubsystem extends SubsystemBase {
 
         public static final double MAX_VOLTAGE = 12.0;
-
+        
         public final double trackWidth;
         public final double wheelbase;
         public final double wheelDiameter;
@@ -50,7 +50,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
         private NetworkTableEntry driveSignalXEntry;
         private NetworkTableEntry driveSignalYEntry;
         private NetworkTableEntry driveSignalRotationEntry;
-        // private NetworkTableEntry cargoAreaEntry;
+
+        private ChassisSpeeds velocity;
+       // private NetworkTableEntry cargoAreaEntry;
         // private NetworkTableEntry cargoXEntry;
 
         public DrivetrainSubsystem(SwerveDriveConfig config, Pigeon pigeon) { // Pixy pixy
@@ -64,7 +66,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 wheelDiameter = config.wheelDiameter;
 
                 // Maximum module velocity in meters/second
-                maxVelocity = 6380.0 / 60.0 * SdsModuleConfigurations.MK4_L2.getDriveReduction() * wheelDiameter
+                maxVelocity = 6380.0 / 60.0 * SdsModuleConfigurations.MK4_L3.getDriveReduction() * wheelDiameter
                                 * Math.PI;
 
                 // Maximum angular velocity in radians/second.
@@ -78,7 +80,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                                 new Translation2d(-trackWidth / 2.0, -wheelbase / 2.0) // BR
                 );
 
-                odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(), new Pose2d());
+                odometry = new SwerveDriveOdometry(kinematics, getGyroscopeRotation(), new Pose2d());
 
                 // Create our swerve module objects.
                 /*
@@ -92,7 +94,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                                 drivetrainModuletab.getLayout("Front Left Module", BuiltInLayouts.kList)
                                                 .withSize(2, 4)
                                                 .withPosition(0, 0),
-                                Mk4SwerveModuleHelper.GearRatio.L2,
+                                Mk4SwerveModuleHelper.GearRatio.L3,
                                 config.frontLeft.driveMotorCanId,
                                 config.frontLeft.steerMotorCanId,
                                 config.frontLeft.encoderCanId,
@@ -102,7 +104,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                                 drivetrainModuletab.getLayout("Front Right Module", BuiltInLayouts.kList)
                                                 .withSize(2, 4)
                                                 .withPosition(2, 0),
-                                Mk4SwerveModuleHelper.GearRatio.L2,
+                                Mk4SwerveModuleHelper.GearRatio.L3,
                                 config.frontRight.driveMotorCanId,
                                 config.frontRight.steerMotorCanId,
                                 config.frontRight.encoderCanId,
@@ -112,7 +114,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                                 drivetrainModuletab.getLayout("Back Left Module", BuiltInLayouts.kList)
                                                 .withSize(2, 4)
                                                 .withPosition(4, 0),
-                                Mk4SwerveModuleHelper.GearRatio.L2,
+                                Mk4SwerveModuleHelper.GearRatio.L3,
                                 config.backLeft.driveMotorCanId,
                                 config.backLeft.steerMotorCanId,
                                 config.backLeft.encoderCanId,
@@ -122,7 +124,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                                 drivetrainModuletab.getLayout("Back Right Module", BuiltInLayouts.kList)
                                                 .withSize(2, 4)
                                                 .withPosition(6, 0),
-                                Mk4SwerveModuleHelper.GearRatio.L2,
+                                Mk4SwerveModuleHelper.GearRatio.L3,
                                 config.backRight.driveMotorCanId,
                                 config.backRight.steerMotorCanId,
                                 config.backRight.encoderCanId,
@@ -157,23 +159,27 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 driveSignalXEntry = driveSignalContainer.add("Drive Signal Forward", 0.0).getEntry();
                 driveSignalRotationEntry = driveSignalContainer.add("Drive Signal Rotation", 0.0).getEntry();
 
-                resetGyroscope();
+                
         }
 
         public void resetPosition() {
-                odometry.resetPosition(new Pose2d(), pigeon.getRotation2d());
-        }
-
-        public void setInitPosition(Pose2d initPose) {
-                odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(), initPose);
+                odometry.resetPosition(new Pose2d(), getGyroscopeRotation());
         }
 
         public Pose2d getPose() {
                 return robotPosition;
         }
 
-        public void resetGyroscope() {
-                pigeon.reset();
+        public double getMaxVelocity() {
+                return maxVelocity;
+        }
+
+        public double getMaxAngularVelocity() {
+                return maxAngularVelocity;
+        }
+
+        public ChassisSpeeds getVelocity(){
+                return velocity;
         }
 
         public void resetInvertGyroscope() {
@@ -184,7 +190,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 odometry.resetPosition(new Pose2d(2.77, -0.65, new Rotation2d()), getGyroscopeRotation());
         }
 
-        public Rotation2d getGyroscopeRotation() {
+        private Rotation2d getGyroscopeRotation() {
                 return Rotation2d.fromDegrees(pigeon.getAngle());
         }
 
@@ -212,13 +218,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 SwerveModuleState[] states = kinematics.toSwerveModuleStates(chassisSpeeds);
                 SwerveDriveKinematics.desaturateWheelSpeeds(states, maxVelocity);
 
-                SwerveModuleState currentFrontLeft = new SwerveModuleState(frontLeftModule.getDriveVelocity(),
+                SwerveModuleState currentFrontLeft = new SwerveModuleState(frontLeftModule.getDriveVelocity() * 1.125,
                                 new Rotation2d(frontLeftModule.getSteerAngle()));
-                SwerveModuleState currentFrontRight = new SwerveModuleState(frontRightModule.getDriveVelocity(),
+                SwerveModuleState currentFrontRight = new SwerveModuleState(frontRightModule.getDriveVelocity() * 1.125,
                                 new Rotation2d(frontRightModule.getSteerAngle()));
-                SwerveModuleState currentBackLeft = new SwerveModuleState(backLeftModule.getDriveVelocity(),
+                SwerveModuleState currentBackLeft = new SwerveModuleState(backLeftModule.getDriveVelocity() * 1.125,
                                 new Rotation2d(backLeftModule.getSteerAngle()));
-                SwerveModuleState currentBackRight = new SwerveModuleState(backRightModule.getDriveVelocity(),
+                SwerveModuleState currentBackRight = new SwerveModuleState(backRightModule.getDriveVelocity() * 1.125,
                                 new Rotation2d(backRightModule.getSteerAngle()));
 
                 SwerveModuleState[] currentStates = new SwerveModuleState[4];
@@ -228,6 +234,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 currentStates[3] = currentBackRight;
 
                 robotPosition = odometry.update(getGyroscopeRotation(), currentStates);
+                velocity = kinematics.toChassisSpeeds(currentStates);
 
                 setModuleStates(states);
 

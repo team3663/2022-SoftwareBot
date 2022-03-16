@@ -23,6 +23,8 @@ public class SwervePath {
 
     private List<Command> m_startingCommands = new ArrayList<Command>();
     private List<Command> m_endingCommands = new ArrayList<Command>();
+    private List<Command> m_initCommands = new ArrayList<Command>();
+    private List<Command> m_finishCommands = new ArrayList<Command>();
     private List<Path> m_paths = new ArrayList<Path>();
 
     private List<Command> m_runCommands = new ArrayList<Command>();
@@ -67,8 +69,20 @@ public class SwervePath {
         m_paths = paths;
         m_startingCommands = StartingCommand;
         m_endingCommands = LastCommand;
+        m_initCommands = List.of();
+        m_finishCommands = List.of();
         
         Generate();
+    }
+
+    public SwervePath(DrivetrainSubsystem subsystem, List<Path> paths, List<Command> StartingCommand, List<Command> LastCommand, List<Command> InitCommand, List<Command> FinishCommand){
+        m_drivetrainSubsystem = subsystem;
+
+        m_paths = paths;
+        m_startingCommands = StartingCommand;
+        m_endingCommands = LastCommand;
+        m_initCommands = InitCommand;
+        m_finishCommands = FinishCommand;
     }
 
     public SwervePath(DrivetrainSubsystem subsystem, List<Path> paths){
@@ -79,6 +93,14 @@ public class SwervePath {
     }
 
     private void Generate(){
+
+        //Adding Init Commands
+        if(m_initCommands.size() > 0){
+
+            for(int i =0; i < m_initCommands.size(); i++){
+                m_runCommands.add(m_initCommands.get(i));
+            }
+        }
         
         
         System.out.println(m_paths.size());
@@ -97,7 +119,14 @@ public class SwervePath {
                 m_runCommands.add(command);
             }
         }
+        // Adding Finishing Commands
+        if(m_finishCommands.size() > 0){
 
+            for(int i = 0; i < m_finishCommands.size(); i++){
+                m_runCommands.add(m_finishCommands.get(i));
+            }
+        }
+        
         //Pushes all the commands into an Array
         commands = new Command[m_runCommands.size()];
         m_runCommands.toArray(commands);

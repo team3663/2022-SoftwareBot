@@ -68,7 +68,6 @@ public class AutoDriveCommand extends CommandBase {
   public void initialize(){
 
     if (!zeroHub) {
-      drivetrain.resetGyroscope();
       drivetrain.resetPosition();
     }
     timer.start();

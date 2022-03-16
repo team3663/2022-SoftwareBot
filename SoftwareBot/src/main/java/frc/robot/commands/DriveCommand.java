@@ -25,11 +25,6 @@ public class DriveCommand extends CommandBase {
         addRequirements(drivetrainSubsystem);
     }
 
-    @Override
-    public void initialize() {
-        drivetrainSubsystem.resetPosition();
-        drivetrainSubsystem.resetInvertGyroscope();
-    }
 
     @Override
     public void execute() {
@@ -38,7 +33,7 @@ public class DriveCommand extends CommandBase {
                         translationXSupplier.getAsDouble(),
                         translationYSupplier.getAsDouble(),
                         rotationSupplier.getAsDouble(),
-                        drivetrainSubsystem.getGyroscopeRotation()
+                        drivetrainSubsystem.getPose().getRotation()
                 ));
     }
 
