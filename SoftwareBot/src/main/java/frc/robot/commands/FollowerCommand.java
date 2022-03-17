@@ -32,7 +32,7 @@ public class FollowerCommand extends CommandBase {
 
   private final HolonomicMotionProfiledTrajectoryFollower follower = new HolonomicMotionProfiledTrajectoryFollower(
       new PidConstants(5.0, 0.0, 0.0),
-      new PidConstants(12, 0.0, 0.0),
+      new PidConstants(5, 0.0, 0.0),
       new HolonomicFeedforward(FEEDFORWARD_CONSTANTS));
 
   private Trajectory m_trajectory;
