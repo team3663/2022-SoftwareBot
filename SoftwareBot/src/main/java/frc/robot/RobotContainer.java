@@ -98,15 +98,17 @@ public class RobotContainer {
     Path secPath = new SplinePathBuilder(new Vector2(5, 3), new Rotation2(-5,-3, true), Rotation2.ZERO)
       .hermite(new Vector2(0, 0), new Rotation2(-5,-3, true), Rotation2.fromDegrees(180)).build();
 
+    Path testPath = new SimplePathBuilder(Vector2.ZERO, Rotation2.ZERO).lineTo(new Vector2(3, 0),Rotation2.fromDegrees(180)).build();
+
     TrajectoryConstraint[] constraints = {
-      new MaxAccelerationConstraint(2),
-      new MaxVelocityConstraint(1),
+      new MaxAccelerationConstraint(3),
+      new MaxVelocityConstraint(7),
       new CentripetalAccelerationConstraint(5.0)
     };
 
     Trajectory trajectory = new Trajectory(path, constraints, Units.inchesToMeters(0.1));
     Trajectory secondTrajectory = new Trajectory(secPath, constraints, Units.inchesToMeters(0.1));
-
+    Trajectory testingRoation = new Trajectory(testPath, constraints, Units.inchesToMeters(0.1));
 
     return new SequentialCommandGroup(new InstantCommand(() -> drivetrain.resetPosition()), new FollowerCommand(drivetrain, trajectory), new FollowerCommand(drivetrain, secondTrajectory));
 

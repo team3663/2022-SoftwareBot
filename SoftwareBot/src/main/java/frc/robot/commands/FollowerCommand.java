@@ -27,12 +27,12 @@ public class FollowerCommand extends CommandBase {
 
   public static final DrivetrainFeedforwardConstants FEEDFORWARD_CONSTANTS = new DrivetrainFeedforwardConstants(
       2.29,
-      0.25,
+      0.28,
       0.0);
 
   private final HolonomicMotionProfiledTrajectoryFollower follower = new HolonomicMotionProfiledTrajectoryFollower(
       new PidConstants(5.0, 0.0, 0.0),
-      new PidConstants(1.0, 0.0, 0.0),
+      new PidConstants(12, 0.0, 0.0),
       new HolonomicFeedforward(FEEDFORWARD_CONSTANTS));
 
   private Trajectory m_trajectory;
