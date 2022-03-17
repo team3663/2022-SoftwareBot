@@ -83,6 +83,7 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
 
+    /*
     Pose2d start = new Pose2d(2.77, -0.65, new Rotation2d());
     Pose2d ball2 = new Pose2d(3.92, -0.65, new Rotation2d());
     Pose2d ball3 = new Pose2d(2.15, -3.26, Rotation2d.fromDegrees(302.13));
@@ -112,7 +113,27 @@ public class RobotContainer {
 
     return new SequentialCommandGroup(new InstantCommand(() -> drivetrain.resetPosition()), new FollowerCommand(drivetrain, trajectory), new FollowerCommand(drivetrain, secondTrajectory));
 
+    */
 
+    Path ball2 = new SplinePathBuilder(new Vector2(0, 0), Rotation2.ZERO, Rotation2.ZERO)
+      .hermite(new Vector2(-1.184, 0.475), Rotation2.ZERO, Rotation2.ZERO)
+      .build();
+    Path ball3 = new SplinePathBuilder(new Vector2(-1.184, 0.475), Rotation2.ZERO, Rotation2.ZERO)
+      .hermite(new Vector2(-2.427, 1.469), Rotation2.ZERO, Rotation2.ZERO)
+      .hermite(new Vector2(-0.433, 2.772), Rotation2.ZERO, Rotation2.ZERO)
+      .build();
+
+      TrajectoryConstraint[] constraints = {
+        new MaxAccelerationConstraint(2),
+        new MaxVelocityConstraint(1),
+        new CentripetalAccelerationConstraint(5.0)
+      };
+  
+      Trajectory t1 = new Trajectory(ball2, constraints, Units.inchesToMeters(0.1));
+      Trajectory t2 = new Trajectory(ball3, constraints, Units.inchesToMeters(0.1));
+  
+
+      return new SequentialCommandGroup(new InstantCommand(() -> drivetrain.resetPosition()), new FollowerCommand(drivetrain, t1), new FollowerCommand(drivetrain, t2));
 
     /*
      * return new SequentialCommandGroup(
