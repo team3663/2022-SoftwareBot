@@ -116,9 +116,13 @@ public class RobotContainer {
     Path ball2 = new SplinePathBuilder(new Vector2(0, 0), Rotation2.ZERO, Rotation2.ZERO)
       .hermite(new Vector2(-1.184, 0.475), Rotation2.ZERO, Rotation2.ZERO)
       .build();
-    Path ball3 = new SplinePathBuilder(new Vector2(-1.184, 0.475), Rotation2.ZERO, Rotation2.ZERO)
-      .hermite(new Vector2(-2.427, 1.469), Rotation2.ZERO, Rotation2.ZERO)
-      .hermite(new Vector2(-0.433, 2.772), Rotation2.ZERO, Rotation2.ZERO)
+    Path ball3 = new SplinePathBuilder(new Vector2(-1.184, 0.475), Rotation2.fromDegrees(-52), Rotation2.ZERO) // heading
+      .hermite(new Vector2(-2.427, 1.469), Rotation2.fromDegrees(-123.22), Rotation2.ZERO) // heading, rotation
+      .hermite(new Vector2(-0.433, 2.772), Rotation2.fromDegrees(112.5), Rotation2.ZERO) // heading, rotation
+      .build();
+
+    Path aim3 = new SplinePathBuilder(new Vector2(0, 0), Rotation2.ZERO, Rotation2.ZERO)
+      .hermite(new Vector2(-1.184, 0.475), Rotation2.ZERO, Rotation2.ZERO) // rotation
       .build();
 
       TrajectoryConstraint[] constraints = {
@@ -131,7 +135,9 @@ public class RobotContainer {
       Trajectory t2 = new Trajectory(ball3, constraints, Units.inchesToMeters(0.1));
   
 
-      return new SequentialCommandGroup(new InstantCommand(() -> drivetrain.resetPosition()), new FollowerCommand(drivetrain, t1), new FollowerCommand(drivetrain, t2));
+      return new SequentialCommandGroup(
+        new InstantCommand(() -> drivetrain.resetPosition()),
+        new FollowerCommand(drivetrain, t1), new FollowerCommand(drivetrain, t2));
 
     /*
      * return new SequentialCommandGroup(
