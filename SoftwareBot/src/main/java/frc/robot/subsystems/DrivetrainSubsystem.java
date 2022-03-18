@@ -59,7 +59,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
                 this.pigeon = pigeon;
                 // this.pixy = pixy;
-
                 // Physical constants for this drive base.
                 trackWidth = config.trackWidth;
                 wheelbase = config.wheelbase;
@@ -186,8 +185,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
                 pigeon.invert();
         }
 
-        public void setAutoInitCommand(Pose2d StartingPosition, Rotation2d StartingRotation) {
-                odometry.resetPosition(new Pose2d(StartingPosition.getX(),StartingPosition.getY(), StartingRotation), getGyroscopeRotation());
+        public void setAutoInitCommand(double x, double y, Rotation2d StartingRotation) {
+                
+                odometry.resetPosition(new Pose2d(x,y, StartingRotation), getGyroscopeRotation());
         }
 
         private Rotation2d getGyroscopeRotation() {
