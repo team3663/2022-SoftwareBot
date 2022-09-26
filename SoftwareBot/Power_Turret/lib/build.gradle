@@ -1,0 +1,47 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    
+}
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+allprojects {
+    group 'power_turret'
+    version '0.1.0'
+
+    repositories {
+        mavenCentral()
+
+        maven { url = uri('https://frcmaven.wpi.edu/artifactory/release/') }
+        maven { url = uri('https://devsite.ctr-electronics.com/maven/release/') }
+        maven { url = uri('https://maven.revrobotics.com/') }
+    }
+}
+
+dependencies {
+    api 'edu.wpi.first.wpilibj:wpilibj-java:2022.3.1'
+
+
+    api 'com.revrobotics.frc:REVLib-java:2022.1.0'
+
+    api 'com.ctre.phoenix:api-java:5.20.2'
+    api 'com.ctre.phoenix:wpiapi-java:5.20.2'
+
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

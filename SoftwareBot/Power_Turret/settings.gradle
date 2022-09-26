@@ -1,0 +1,11 @@
+pluginManagement {
+    plugins {
+        id 'com.github.johnrengelman.shadow' version '7.1.2'
+        id 'edu.wpi.first.GradleRIO' version '2022.8.2'
+    }
+}
+
+rootProject.name = 'Power_Turret'
+include('lib')
+//include('power_turret')
+
